@@ -1,5 +1,7 @@
 """Tests for the builder-validator integration."""
 
+import sys
+
 import pytest
 
 from latence._pipeline.builder import PipelineBuilder
@@ -70,12 +72,12 @@ def test_alias_resolution_in_add():
 # =============================================================================
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="PEP 604 unions in get_type_hints")
 def test_from_yaml_returns_builder():
     """Verify PipelineBuilder.from_yaml has the right return type annotation."""
     from typing import get_type_hints
 
     hints = get_type_hints(PipelineBuilder.from_yaml)
-    # Return can be PipelineBuilder or forward reference string
     return_hint = hints.get("return")
     assert return_hint is PipelineBuilder or (
         isinstance(return_hint, str) and "PipelineBuilder" in return_hint
