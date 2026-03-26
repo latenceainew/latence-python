@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Union, overload
 
 try:
-    from bs4 import BeautifulSoup  # type: ignore[import-untyped]
+    from bs4 import BeautifulSoup  # type: ignore[import-untyped,import-not-found]
 
     HAS_BEAUTIFULSOUP = True
 except ImportError:

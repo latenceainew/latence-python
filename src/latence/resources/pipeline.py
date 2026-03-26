@@ -494,8 +494,8 @@ class Pipeline(SyncResource):
         svc_configs = {sc.service: sc.config for sc in config.services}
         body: dict[str, Any] = {
             "services": [
-                {"service": s, "config": svc_configs.get(s, {})}
-                for s in validation.services  # type: ignore[call-overload]
+                {"service": s, "config": svc_configs.get(s, {})}  # type: ignore[call-overload]
+                for s in validation.services
             ],
             "store_intermediate": config.store_intermediate,
             "input": pipeline_input.model_dump(exclude_none=True),
@@ -1017,8 +1017,8 @@ class AsyncPipeline(AsyncResource):
         svc_configs = {sc.service: sc.config for sc in config.services}
         body: dict[str, Any] = {
             "services": [
-                {"service": s, "config": svc_configs.get(s, {})}
-                for s in validation.services  # type: ignore[call-overload]
+                {"service": s, "config": svc_configs.get(s, {})}  # type: ignore[call-overload]
+                for s in validation.services
             ],
             "store_intermediate": config.store_intermediate,
             "input": pipeline_input.model_dump(exclude_none=True),
