@@ -1,0 +1,214 @@
+# =============================================================================
+# Latence AI — Pipeline Configuration
+# =============================================================================
+#
+# This file defines a complete pipeline configuration with all available
+# parameters for each service. Use it as a reference or starting point for
+# your own pipeline.
+#
+# Usage:
+#   from latence import PipelineBuilder
+#   config = PipelineBuilder.from_yaml("pipeline.yml")
+#
+# Or load directly:
+#   from latence._pipeline.config_loader import load_pipeline_config
+#   config, warnings = load_pipeline_config("pipeline.yml")
+#
+# Docs: https://latence.ai/docs
+# =============================================================================
+
+# Pipeline metadata
+name: my-data-intelligence-pipeline
+store_intermediate: true   # Keep results from each stage (required for DataPackage)
+
+steps:
+
+  # ---------------------------------------------------------------------------
+  # 1. Document Intelligence (OCR)
+  # ---------------------------------------------------------------------------
+  # Extracts text, tables, and structure from PDFs, images, and office files.
+  #
+  # Note: Additional expert params (seal_recognition, auto-rotate, dewarp,
+  # target_longest, include_images) are only available via the direct API,
+  # not in the pipeline.
+  #
+  document_intelligence:
+    # Processing mode:
+    #   "default"     — Standard OCR (1.0x credits)
+    #   "performance" — Auto-refinement with cross-page table merge
+    #                   and title releveling (1.5x credits)
+    mode: default
+
+    # Output format for extracted content:
+    #   "markdown" — Clean Markdown (default)
+    #   "json"     — Structured JSON with regions/blocks
+    #   "html"     — HTML with layout preserved
+    #   "xlsx"     — Spreadsheet (tables only)
+    output_format: markdown
+
+    # Layout detection: detect headers, paragraphs, tables, figures
+    use_layout_detection: true
+
+    # Chart recognition: parse charts/graphs into structured data
+    use_chart_recognition: false
+
+  # ---------------------------------------------------------------------------
+  # 2. Redaction
+  # ---------------------------------------------------------------------------
+  # Detects and optionally redacts personally identifiable information (PII).
+  #
+  redaction:
+    # Detection sensitivity mode:
+    #   "balanced"  — Default balance of precision and recall (1.0x)
+    #   "strict"    — Higher recall, catches more PII (1.3x credits)
+    #   "recall"    — Maximize recall (1.0x)
+    #   "precision" — Maximize precision (1.0x)
+    mode: balanced
+
+    # Minimum confidence score for PII detection (0.0–1.0)
+    # Lower values catch more PII but may have false positives.
+    threshold: 0.3
+
+    # Apply redaction to detected PII.
+    # When false, only detection is performed (no text modification).
+    redact: true
+
+    # How PII is redacted (only applies when redact: true):
+    #   "mask"    — Replace PII with [LABEL] tokens (1.2x credits)
+    #   "replace" — Generate synthetic replacement data (1.5x credits)
+    redaction_mode: mask
+
+    # Normalize confidence scores using Platt scaling
+    normalize_scores: true
+
+    # Token chunk size for processing
+    chunk_size: 1024
+
+    # Full LLM refinement is always enabled in pipelines for production-grade
+    # PII filtering. The cost is included in the pipeline pricing (2.5x credits).
+    # To control refinement manually, use the direct API instead.
+    enforce_refinement: true
+
+  # ---------------------------------------------------------------------------
+  # 3. Entity Extraction
+  # ---------------------------------------------------------------------------
+  # Extracts named entities: people, organizations, dates, amounts, etc.
+  #
+  extraction:
+    # Label generation mode:
+    #   "user"      — You provide entity labels (1.0x credits)
+    #   "generated" — AI generates labels automatically (2.5x credits)
+    #   "hybrid"    — Combine your labels with AI-generated ones (1.5x credits)
+    label_mode: hybrid
+
+    # Entity labels to extract (required for "user" and "hybrid" modes)
+    user_labels:
+      - person
+      - organization
+      - location
+      - date
+      - monetary_amount
+
+    # Minimum confidence score for entity extraction (0.0–1.0)
+    threshold: 0.3
+
+    # Flat NER: non-overlapping entities.
+    # Set to false for nested entity detection.
+    flat_ner: true
+
+    # Multi-label: allow multiple labels per entity span
+    multi_label: false
+
+    # Token chunk size for processing
+    chunk_size: 1024
+
+    # LLM refinement for better accuracy (1.5x credits)
+    enable_refinement: false
+
+    # Refine ALL entities with LLM (2.5x credits)
+    enforce_refinement: false
+
+    # Score cutoff for LLM refinement
+    refinement_threshold: 0.5
+
+  # ---------------------------------------------------------------------------
+  # 4. Relation Extraction (Knowledge Graph)
+  # ---------------------------------------------------------------------------
+  # Extracts entity relationships and builds semantic knowledge graphs.
+  #
+  ontology:
+    # Knowledge graph output format:
+    #   "custom"         — Custom JSON structure
+    #   "rdf_turtle"     — RDF/Turtle serialization
+    #   "property_graph" — Property graph format (Neo4j-compatible)
+    kg_output_format: custom
+
+    # Entity resolution: merge duplicate entities across text
+    # Uses hybrid similarity + embeddings (2.0x credits)
+    resolve_entities: true
+
+    # Optimize relations: refine relation labels with LLM (1.5x credits)
+    optimize_relations: true
+
+    # Minimum confidence threshold for entity-pair relations (0.0–1.0)
+    relation_threshold: 0.6
+
+    # Symmetric (bidirectional) relation detection
+    symmetric: true
+
+    # Generate the full knowledge graph output structure
+    generate_knowledge_graph: true
+
+    # Maximum relations per decode batch (1–100)
+    max_relations_per_decode: 30
+
+    # Use LLM for entity resolution optimization
+    optimize_entity_resolution: false
+
+    # Predict missing relations between entities (2.5x credits)
+    predict_missing_relations: false
+
+    # Verify predicted links with an LLM
+    # (only used when predict_missing_relations is true)
+    link_prediction_verify_with_ai: false
+
+    # Namespace URI for RDF/Turtle output
+    # (only used when kg_output_format is "rdf_turtle")
+    # namespace_uri: "http://example.org/ontology#"
+
+  # ---------------------------------------------------------------------------
+  # 5. Compression
+  # ---------------------------------------------------------------------------
+  # Intelligently compresses text while preserving key information.
+  #
+  compression:
+    # Fraction of tokens to remove (0.0 = keep all, 1.0 = remove all)
+    # 0.5 removes approximately 50% of tokens
+    compression_rate: 0.5
+
+    # Preserve numeric tokens during compression
+    force_preserve_digit: true
+
+    # TOON encoding: apply TOON encoding before compression
+    # for additional token reduction
+    apply_toon: false
+
+    # Specific tokens that should never be removed
+    # force_tokens:
+    #   - API
+    #   - JSON
+
+    # Maximum tokens per chunk for processing (512–16384)
+    chunk_size: 4096
+
+    # Return original text if compression fails for a chunk
+    fallback_mode: true
+
+  # ---------------------------------------------------------------------------
+  # Coming Soon
+  # ---------------------------------------------------------------------------
+  # The following services are on our roadmap but not yet available:
+  #
+  # chunking:            Semantic document chunking
+  # feature_enrichment:  Feature scoring and classification
+  # graph_ontology_builder: Graph and Ontology Builder (entity resolution, ontology construction, KB linking)
