@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import Any
 
 from ._base import BaseAsyncClient, BaseSyncClient
-from ._constants import DEFAULT_BASE_URL, DEFAULT_MAX_RETRIES, DEFAULT_TIMEOUT
+from ._constants import DEFAULT_MAX_RETRIES, DEFAULT_TIMEOUT
 from ._deprecation import DeprecatedServiceProperty
 from .resources import (
     AsyncCredits,

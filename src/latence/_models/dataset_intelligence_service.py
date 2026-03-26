@@ -61,12 +61,8 @@ class DatasetIntelligenceResponse(BaseResponse):
     dataset_id: str = ""
     mode: str = "create"
     data: dict[str, Any] = Field(default_factory=dict)
-    usage: DatasetIntelligenceUsage = Field(
-        default_factory=DatasetIntelligenceUsage
-    )
-    stage_timings: list[DatasetIntelligenceStageTiming] = Field(
-        default_factory=list
-    )
+    usage: DatasetIntelligenceUsage = Field(default_factory=DatasetIntelligenceUsage)
+    stage_timings: list[DatasetIntelligenceStageTiming] = Field(default_factory=list)
     delta_summary: DatasetIntelligenceDeltaSummary | None = None
     processing_time_ms: float = 0.0
     version: str = ""

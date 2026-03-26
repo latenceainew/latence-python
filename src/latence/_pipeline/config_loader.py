@@ -26,45 +26,81 @@ from pathlib import Path
 from typing import Any
 
 from .._models.pipeline import PipelineConfig
-from .spec import STEP_ALIASES, PLACEHOLDER_STEPS, parse_steps_config
-
+from .spec import PLACEHOLDER_STEPS, STEP_ALIASES, parse_steps_config
 
 # Accepted top-level keys in the YAML file
-_TOP_LEVEL_KEYS = frozenset({
-    "steps",
-    "name",
-    "store_intermediate",
-    "strict_mode",
-})
+_TOP_LEVEL_KEYS = frozenset(
+    {
+        "steps",
+        "name",
+        "store_intermediate",
+        "strict_mode",
+    }
+)
 
 # Known parameters per service for validation warnings
 KNOWN_PARAMS: dict[str, frozenset[str]] = {
     # Pipeline-available params only. Layout detection, chart recognition,
     # seal recognition, auto-rotate, and dewarp are locked to optimal defaults
     # in pipelines. For full control, use the direct API.
-    "document_intelligence": frozenset({
-        "mode", "output_format", "use_ocr_for_image_block",
-    }),
-    "redaction": frozenset({
-        "mode", "threshold", "redact", "redaction_mode", "normalize_scores",
-        "chunk_size", "enable_refinement", "enforce_refinement",
-        "refinement_threshold",
-    }),
-    "extraction": frozenset({
-        "label_mode", "user_labels", "threshold", "flat_ner", "multi_label",
-        "chunk_size", "enable_refinement", "enforce_refinement",
-        "refinement_threshold",
-    }),
-    "ontology": frozenset({
-        "relation_threshold", "symmetric", "generate_knowledge_graph",
-        "max_relations_per_decode", "resolve_entities", "optimize_relations",
-        "optimize_entity_resolution", "predict_missing_relations",
-        "link_prediction_verify_with_ai", "kg_output_format", "namespace_uri",
-    }),
-    "compression": frozenset({
-        "compression_rate", "force_preserve_digit", "force_tokens",
-        "apply_toon", "chunk_size", "fallback_mode",
-    }),
+    "document_intelligence": frozenset(
+        {
+            "mode",
+            "output_format",
+            "use_ocr_for_image_block",
+        }
+    ),
+    "redaction": frozenset(
+        {
+            "mode",
+            "threshold",
+            "redact",
+            "redaction_mode",
+            "normalize_scores",
+            "chunk_size",
+            "enable_refinement",
+            "enforce_refinement",
+            "refinement_threshold",
+        }
+    ),
+    "extraction": frozenset(
+        {
+            "label_mode",
+            "user_labels",
+            "threshold",
+            "flat_ner",
+            "multi_label",
+            "chunk_size",
+            "enable_refinement",
+            "enforce_refinement",
+            "refinement_threshold",
+        }
+    ),
+    "ontology": frozenset(
+        {
+            "relation_threshold",
+            "symmetric",
+            "generate_knowledge_graph",
+            "max_relations_per_decode",
+            "resolve_entities",
+            "optimize_relations",
+            "optimize_entity_resolution",
+            "predict_missing_relations",
+            "link_prediction_verify_with_ai",
+            "kg_output_format",
+            "namespace_uri",
+        }
+    ),
+    "compression": frozenset(
+        {
+            "compression_rate",
+            "force_preserve_digit",
+            "force_tokens",
+            "apply_toon",
+            "chunk_size",
+            "fallback_mode",
+        }
+    ),
 }
 
 
@@ -77,20 +113,14 @@ def _validate_yaml_structure(data: dict[str, Any]) -> list[str]:
     warnings: list[str] = []
 
     if not isinstance(data, dict):
-        raise PipelineConfigError(
-            "Pipeline YAML must be a mapping (dict) at the top level."
-        )
+        raise PipelineConfigError("Pipeline YAML must be a mapping (dict) at the top level.")
 
     unknown_keys = set(data.keys()) - _TOP_LEVEL_KEYS
     if unknown_keys:
-        warnings.append(
-            f"Unknown top-level keys ignored: {', '.join(sorted(unknown_keys))}"
-        )
+        warnings.append(f"Unknown top-level keys ignored: {', '.join(sorted(unknown_keys))}")
 
     if "steps" not in data:
-        raise PipelineConfigError(
-            "Pipeline YAML must contain a 'steps' key."
-        )
+        raise PipelineConfigError("Pipeline YAML must contain a 'steps' key.")
 
     steps = data["steps"]
     if not isinstance(steps, dict) or not steps:
@@ -110,8 +140,7 @@ def _validate_yaml_structure(data: dict[str, Any]) -> list[str]:
 
         if lowered not in all_known:
             raise PipelineConfigError(
-                f"Unknown step '{step_name}'. "
-                f"Available: {', '.join(sorted(all_known))}"
+                f"Unknown step '{step_name}'. Available: {', '.join(sorted(all_known))}"
             )
 
         if step_config is not None and not isinstance(step_config, dict):
@@ -155,8 +184,7 @@ def load_pipeline_config(
         import yaml
     except ImportError:
         raise ImportError(
-            "PyYAML is required for YAML config loading. "
-            "Install it with: pip install pyyaml"
+            "PyYAML is required for YAML config loading. Install it with: pip install pyyaml"
         ) from None
 
     path = Path(path)
@@ -172,9 +200,7 @@ def load_pipeline_config(
     warnings = _validate_yaml_structure(data)
 
     if strict and warnings:
-        raise PipelineConfigError(
-            "Strict mode: " + "; ".join(warnings)
-        )
+        raise PipelineConfigError("Strict mode: " + "; ".join(warnings))
 
     steps_raw: dict[str, dict[str, Any]] = {}
     for step_name, step_config in data["steps"].items():

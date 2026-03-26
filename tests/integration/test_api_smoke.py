@@ -3,18 +3,20 @@ Smoke tests for Latence API integration.
 These tests verify basic connectivity and functionality against the staging API.
 
 Run with:
-    LATENCE_BASE_URL=https://staging.api.latence.ai LATENCE_API_KEY=your_key pytest tests/integration/ -v
+    LATENCE_BASE_URL=https://staging.api.latence.ai \
+    LATENCE_API_KEY=your_key pytest tests/integration/ -v
 """
 
 import os
-import pytest
-from latence import Latence
 
+import pytest
+
+from latence import Latence
 
 # Skip all tests if no API key is configured
 pytestmark = pytest.mark.skipif(
     not os.environ.get("LATENCE_API_KEY"),
-    reason="LATENCE_API_KEY not set - skipping integration tests"
+    reason="LATENCE_API_KEY not set - skipping integration tests",
 )
 
 
@@ -40,10 +42,7 @@ class TestEmbeddingService:
 
     def test_embed_single_text(self, client):
         """Test embedding a single text string."""
-        result = client.embedding.embed(
-            text="Hello, world!",
-            dimension=256
-        )
+        result = client.embedding.embed(text="Hello, world!", dimension=256)
         assert result is not None
         assert hasattr(result, "embeddings")
         # embeddings is a list of vectors; single text returns 1 vector of `dimension` floats
@@ -53,10 +52,7 @@ class TestEmbeddingService:
     def test_embed_batch(self, client):
         """Test embedding multiple texts."""
         texts = ["First text", "Second text", "Third text"]
-        result = client.embedding.embed(
-            text=texts,
-            dimension=256
-        )
+        result = client.embedding.embed(text=texts, dimension=256)
         assert result is not None
         # Should return embeddings for each text
         assert hasattr(result, "embeddings")
@@ -79,10 +75,7 @@ class TestHealthCheck:
         """Test that API is reachable and responding."""
         # Simple embedding call to verify API is up
         try:
-            result = client.embedding.embed(
-                text="health check",
-                dimension=256
-            )
+            result = client.embedding.embed(text="health check", dimension=256)
             assert result is not None
         except Exception as e:
             pytest.fail(f"API not reachable: {e}")
@@ -156,8 +149,10 @@ class TestChunkingService:
         assert chunk.index == 0
         assert chunk.char_count > 0
 
-        print(f"\n  [PASS] Hybrid chunking: {result.data.num_chunks} chunks, "
-              f"{result.data.processing_time_ms:.1f}ms")
+        print(
+            f"\n  [PASS] Hybrid chunking: {result.data.num_chunks} chunks, "
+            f"{result.data.processing_time_ms:.1f}ms"
+        )
 
     def test_chunk_character_free(self, client):
         """Character strategy: fixed-length splits (free tier)."""
@@ -229,7 +224,7 @@ class TestChunkingService:
         assert isinstance(chunk.end, int)
         assert isinstance(chunk.char_count, int)
 
-        print(f"\n  [PASS] Chunk metadata fields verified")
+        print("\n  [PASS] Chunk metadata fields verified")
 
     def test_chunk_min_chunk_size(self, client):
         """Verify min_chunk_size parameter discards small chunks."""
@@ -247,8 +242,10 @@ class TestChunkingService:
         )
         assert result_low.data.num_chunks >= result_high.data.num_chunks
 
-        print(f"\n  [PASS] min_chunk_size: low={result_low.data.num_chunks}, "
-              f"high={result_high.data.num_chunks}")
+        print(
+            f"\n  [PASS] min_chunk_size: low={result_low.data.num_chunks}, "
+            f"high={result_high.data.num_chunks}"
+        )
 
 
 # =============================================================================
@@ -278,6 +275,7 @@ class TestStandaloneChunkingNotInPipeline:
     def test_builder_chunking_raises(self):
         """PipelineBuilder.chunking() must raise NotImplementedError."""
         from latence import PipelineBuilder
+
         with pytest.raises(NotImplementedError, match="not available as a pipeline step"):
             PipelineBuilder().chunking()
 

@@ -3,21 +3,18 @@
 import pytest
 
 from latence._models.enrichment import (
-    ChunkData,
     ChunkItem,
     ChunkResponse,
-    EnrichData,
     EnrichResponse,
 )
 from latence._pipeline.builder import PipelineBuilder
+from latence._pipeline.data_package import EnrichmentSection, EnrichmentSummary
 from latence._pipeline.spec import (
     PLACEHOLDER_STEPS,
     STEP_ALIASES,
     STEP_ORDER,
     resolve_step_name,
 )
-from latence._pipeline.data_package import EnrichmentSection, EnrichmentSummary
-
 
 # =============================================================================
 # MODEL TESTS

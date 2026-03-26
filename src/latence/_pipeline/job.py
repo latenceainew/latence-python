@@ -14,7 +14,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
 
 from .._exceptions import JobError, JobTimeoutError
-from .._models.pipeline import PipelineReport, PipelineResultResponse, PipelineStatusResponse, StageDownload
+from .._models.pipeline import (
+    PipelineReport,
+    PipelineStatusResponse,
+    StageDownload,
+)
 from .data_package import DataPackage
 
 if TYPE_CHECKING:

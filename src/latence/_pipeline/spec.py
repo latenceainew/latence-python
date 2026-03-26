@@ -18,7 +18,6 @@ from typing import Any, BinaryIO
 from .._models.pipeline import FileInput, PipelineConfig, PipelineInput, ServiceConfig
 from .._utils import file_to_base64
 
-
 # =============================================================================
 # Step Aliases
 # =============================================================================
@@ -155,10 +154,7 @@ def resolve_step_name(name: str) -> str:
     resolved = STEP_ALIASES.get(lowered)
     if resolved is None:
         known = sorted(set(STEP_ALIASES.keys()) | set(PLACEHOLDER_STEPS.keys()))
-        raise ValueError(
-            f"Unknown pipeline step '{name}'. "
-            f"Available steps: {', '.join(known)}"
-        )
+        raise ValueError(f"Unknown pipeline step '{name}'. Available steps: {', '.join(known)}")
 
     # Also check if the resolved name is a placeholder
     if resolved in PLACEHOLDER_STEPS:
@@ -276,21 +272,18 @@ def parse_input(
                 if f_str.startswith("s3://"):
                     raise NotImplementedError(
                         "S3 source input is coming soon. "
-                        "For now, download the file locally or provide a presigned URL via file_urls."
+                        "For now, download the file locally or "
+                        "provide a presigned URL via file_urls."
                     )
                 if f_str.startswith(("http://", "https://")):
                     file_inputs.append(FileInput(url=f_str))
                 else:
                     base64_data, filename = file_to_base64(f)
-                    file_inputs.append(
-                        FileInput(base64=base64_data, filename=filename)
-                    )
+                    file_inputs.append(FileInput(base64=base64_data, filename=filename))
             else:
                 # BinaryIO
                 base64_data, filename = file_to_base64(f)
-                file_inputs.append(
-                    FileInput(base64=base64_data, filename=filename)
-                )
+                file_inputs.append(FileInput(base64=base64_data, filename=filename))
 
     if file_urls:
         for url in file_urls:

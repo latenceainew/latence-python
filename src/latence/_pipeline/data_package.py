@@ -18,8 +18,6 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-_log = logging.getLogger("latence.pipeline")
-
 from .._models.common import Entity
 from .._models.ontology import OntologyEntityRef, OntologyRelation
 from .._models.pipeline import (
@@ -28,6 +26,7 @@ from .._models.pipeline import (
     StageResult,
 )
 
+_log = logging.getLogger("latence.pipeline")
 
 # =============================================================================
 # Section Models
@@ -70,9 +69,7 @@ class EntitySummary(BaseModel):
     """Summary statistics for extracted entities."""
 
     total: int = Field(default=0, description="Total number of entities")
-    by_type: dict[str, int] = Field(
-        default_factory=dict, description="Entity count by type"
-    )
+    by_type: dict[str, int] = Field(default_factory=dict, description="Entity count by type")
     unique_labels: list[str] = Field(
         default_factory=list, description="All unique entity types found"
     )
@@ -101,12 +98,8 @@ class GraphSummary(BaseModel):
 
     total_entities: int = Field(default=0, description="Total entities in graph")
     total_relations: int = Field(default=0, description="Total relations in graph")
-    resolved_entities: int | None = Field(
-        default=None, description="Entities after resolution"
-    )
-    entity_types: list[str] = Field(
-        default_factory=list, description="Unique entity type labels"
-    )
+    resolved_entities: int | None = Field(default=None, description="Entities after resolution")
+    entity_types: list[str] = Field(default_factory=list, description="Unique entity type labels")
     relation_types: list[str] = Field(
         default_factory=list, description="Unique relation type labels"
     )
@@ -121,9 +114,7 @@ class KnowledgeGraphSection(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    entities: list[Entity] = Field(
-        default_factory=list, description="Resolved entities"
-    )
+    entities: list[Entity] = Field(default_factory=list, description="Resolved entities")
     relations: list[OntologyRelation] = Field(
         default_factory=list, description="Extracted relations"
     )
@@ -140,12 +131,8 @@ class RedactionSummary(BaseModel):
     """Summary statistics for PII redaction."""
 
     total_pii: int = Field(default=0, description="Total PII entities detected")
-    by_type: dict[str, int] = Field(
-        default_factory=dict, description="PII count by type"
-    )
-    unique_labels: list[str] = Field(
-        default_factory=list, description="Types of PII found"
-    )
+    by_type: dict[str, int] = Field(default_factory=dict, description="PII count by type")
+    unique_labels: list[str] = Field(default_factory=list, description="Types of PII found")
 
 
 class RedactionSection(BaseModel):
@@ -157,9 +144,7 @@ class RedactionSection(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     redacted_text: str = Field(description="Text after PII redaction")
-    pii_detected: list[Entity] = Field(
-        default_factory=list, description="Detected PII entities"
-    )
+    pii_detected: list[Entity] = Field(default_factory=list, description="Detected PII entities")
     summary: RedactionSummary = Field(
         default_factory=RedactionSummary, description="Redaction summary statistics"
     )
@@ -196,9 +181,7 @@ class ChunkingSummary(BaseModel):
     num_chunks: int = Field(default=0, description="Number of chunks produced")
     strategy: str = Field(default="hybrid", description="Chunking strategy used")
     chunk_size: int = Field(default=512, description="Target chunk size parameter")
-    processing_time_ms: float = Field(
-        default=0.0, description="Processing time in milliseconds"
-    )
+    processing_time_ms: float = Field(default=0.0, description="Processing time in milliseconds")
 
 
 class ChunkingSection(BaseModel):
@@ -226,9 +209,7 @@ class EnrichmentSummary(BaseModel):
     features_computed: list[str] = Field(
         default_factory=list, description="Feature groups that were computed"
     )
-    processing_time_ms: float = Field(
-        default=0.0, description="Processing time in milliseconds"
-    )
+    processing_time_ms: float = Field(default=0.0, description="Processing time in milliseconds")
 
 
 class EnrichmentSection(BaseModel):
@@ -242,9 +223,7 @@ class EnrichmentSection(BaseModel):
     chunks: list[dict[str, Any]] = Field(
         default_factory=list, description="Chunk objects with metadata"
     )
-    embeddings: list[Any] = Field(
-        default_factory=list, description="Chunk embeddings"
-    )
+    embeddings: list[Any] = Field(default_factory=list, description="Chunk embeddings")
     features: dict[str, Any] = Field(
         default_factory=dict, description="Feature groups keyed by name"
     )
@@ -258,12 +237,8 @@ class StageReport(BaseModel):
 
     service: str = Field(description="Service name")
     status: str = Field(description="Stage status")
-    processing_time_ms: float | None = Field(
-        default=None, description="Processing time in ms"
-    )
-    credits_used: float | None = Field(
-        default=None, description="Credits consumed by this stage"
-    )
+    processing_time_ms: float | None = Field(default=None, description="Processing time in ms")
+    credits_used: float | None = Field(default=None, description="Credits consumed by this stage")
     items_produced: int | None = Field(
         default=None, description="Number of items produced (entities, relations, etc.)"
     )
@@ -300,9 +275,7 @@ class QualityReport(BaseModel):
     total_processing_time_ms: float = Field(
         default=0.0, description="Total processing time across all stages"
     )
-    total_cost_usd: float | None = Field(
-        default=None, description="Total cost in USD"
-    )
+    total_cost_usd: float | None = Field(default=None, description="Total cost in USD")
 
 
 # =============================================================================
@@ -346,9 +319,7 @@ class DataPackage(BaseModel):
     document: DocumentSection | None = Field(
         default=None, description="OCR / Document Intelligence output"
     )
-    entities: EntitiesSection | None = Field(
-        default=None, description="Entity Extraction output"
-    )
+    entities: EntitiesSection | None = Field(default=None, description="Entity Extraction output")
     knowledge_graph: KnowledgeGraphSection | None = Field(
         default=None, description="Knowledge Graph / Relation Extraction output"
     )
@@ -439,9 +410,7 @@ class DataPackage(BaseModel):
 
         server_created_at = getattr(result, "created_at", None)
         created_at = (
-            server_created_at
-            if server_created_at
-            else datetime.now(timezone.utc).isoformat()
+            server_created_at if server_created_at else datetime.now(timezone.utc).isoformat()
         )
 
         pkg = cls(
@@ -505,9 +474,7 @@ class DataPackage(BaseModel):
                 zf.writestr(f"{folder_name}/document.md", self.document.markdown)
                 if self.document.pages:
                     for i, page in enumerate(self.document.pages, 1):
-                        zf.writestr(
-                            f"{folder_name}/pages/page_{i:03d}.md", page
-                        )
+                        zf.writestr(f"{folder_name}/pages/page_{i:03d}.md", page)
 
             # Entities
             if self.entities:
@@ -577,9 +544,7 @@ class DataPackage(BaseModel):
                     if v is not None
                 ],
             }
-            zf.writestr(
-                f"{folder_name}/metadata.json", _to_json(metadata)
-            )
+            zf.writestr(f"{folder_name}/metadata.json", _to_json(metadata))
 
         dest.write_bytes(buf.getvalue())
         return dest
@@ -633,9 +598,7 @@ class DataPackage(BaseModel):
         doc_entry: dict[str, Any] = {}
 
         if self.document:
-            doc_entry["filename"] = (
-                self.document.metadata.filename or "document"
-            )
+            doc_entry["filename"] = self.document.metadata.filename or "document"
             doc_entry["markdown"] = self.document.markdown
             if self.document.pages:
                 doc_entry["pages"] = self.document.pages
@@ -676,9 +639,13 @@ class DataPackage(BaseModel):
             if self.knowledge_graph.relations:
                 kg["relations"] = [
                     {
-                        "source": r.entity1.text if isinstance(r.entity1, OntologyEntityRef) else str(r.entity1),
+                        "source": r.entity1.text
+                        if isinstance(r.entity1, OntologyEntityRef)
+                        else str(r.entity1),
                         "relation": r.relation_type,
-                        "target": r.entity2.text if isinstance(r.entity2, OntologyEntityRef) else str(r.entity2),
+                        "target": r.entity2.text
+                        if isinstance(r.entity2, OntologyEntityRef)
+                        else str(r.entity2),
                         "score": r.score,
                     }
                     for r in self.knowledge_graph.relations
@@ -737,9 +704,7 @@ class DataPackage(BaseModel):
                 rt = r.relation_type
                 relation_by_type[rt] = relation_by_type.get(rt, 0) + 1
 
-        services_executed = [
-            s.service for s in self.quality.stages if s.status == "completed"
-        ]
+        services_executed = [s.service for s in self.quality.stages if s.status == "completed"]
 
         summary: dict[str, Any] = {
             "documents": len(documents),
@@ -749,7 +714,9 @@ class DataPackage(BaseModel):
                 "by_type": entity_by_type,
             },
             "relations": {
-                "total": self.knowledge_graph.summary.total_relations if self.knowledge_graph else 0,
+                "total": self.knowledge_graph.summary.total_relations
+                if self.knowledge_graph
+                else 0,
                 "by_type": relation_by_type,
             },
             "cost_usd": self.quality.total_cost_usd,
@@ -802,9 +769,7 @@ class DataPackage(BaseModel):
         if self.knowledge_graph:
             ents = self.knowledge_graph.summary.total_entities
             rels = self.knowledge_graph.summary.total_relations
-            lines.append(
-                f"- **knowledge_graph.json** -- {ents} entities, {rels} relations"
-            )
+            lines.append(f"- **knowledge_graph.json** -- {ents} entities, {rels} relations")
 
         if self.redaction:
             pii = self.redaction.summary.total_pii
@@ -820,16 +785,12 @@ class DataPackage(BaseModel):
         if self.chunking:
             nc = self.chunking.summary.num_chunks
             strat = self.chunking.summary.strategy
-            lines.append(
-                f"- **chunking.json** -- {nc} chunks, strategy: {strat}"
-            )
+            lines.append(f"- **chunking.json** -- {nc} chunks, strategy: {strat}")
 
         if self.enrichment:
             nc = self.enrichment.summary.num_chunks
             feats = ", ".join(self.enrichment.summary.features_computed[:5])
-            lines.append(
-                f"- **enrichment.json** -- {nc} chunks, features: {feats}"
-            )
+            lines.append(f"- **enrichment.json** -- {nc} chunks, features: {feats}")
 
         lines.extend(
             [
@@ -843,17 +804,13 @@ class DataPackage(BaseModel):
         )
 
         if self.quality.confidence.ocr_quality is not None:
-            lines.append(
-                f"- OCR quality: {self.quality.confidence.ocr_quality:.2f}"
-            )
+            lines.append(f"- OCR quality: {self.quality.confidence.ocr_quality:.2f}")
         if self.quality.confidence.entity_avg_confidence is not None:
             lines.append(
                 f"- Entity avg confidence: {self.quality.confidence.entity_avg_confidence:.2f}"
             )
         if self.quality.confidence.graph_completeness is not None:
-            lines.append(
-                f"- Graph completeness: {self.quality.confidence.graph_completeness:.2f}"
-            )
+            lines.append(f"- Graph completeness: {self.quality.confidence.graph_completeness:.2f}")
 
         lines.extend(
             [
@@ -940,7 +897,9 @@ def _build_entities_section(
 
     # RunPod services may nest output under "result" or "data"
     inner = data.get("result", data.get("data", data))
-    raw_entities = inner.get("entities", []) if isinstance(inner, dict) else data.get("entities", [])
+    raw_entities = (
+        inner.get("entities", []) if isinstance(inner, dict) else data.get("entities", [])
+    )
     items: list[Entity] = []
     for e in raw_entities:
         if isinstance(e, Entity):
@@ -1039,11 +998,15 @@ def _build_redaction_section(
     # RunPod services may nest output under "result" or "data"
     inner = data.get("result", data.get("data", data))
 
-    redacted_text = inner.get("redacted_text", "") if isinstance(inner, dict) else data.get("redacted_text", "")
+    redacted_text = (
+        inner.get("redacted_text", "") if isinstance(inner, dict) else data.get("redacted_text", "")
+    )
     if not redacted_text:
         return None
 
-    raw_entities = inner.get("entities", []) if isinstance(inner, dict) else data.get("entities", [])
+    raw_entities = (
+        inner.get("entities", []) if isinstance(inner, dict) else data.get("entities", [])
+    )
     pii_detected: list[Entity] = []
     for e in raw_entities:
         if isinstance(e, Entity):
@@ -1077,16 +1040,26 @@ def _build_compression_section(
     # RunPod services may nest output under "result" or "data"
     inner = data.get("result", data.get("data", data))
 
-    compressed_text = inner.get("compressed_text", "") if isinstance(inner, dict) else data.get("compressed_text", "")
+    compressed_text = (
+        inner.get("compressed_text", "")
+        if isinstance(inner, dict)
+        else data.get("compressed_text", "")
+    )
     if not compressed_text:
         return None
 
-    original_tokens = inner.get("original_tokens", 0) if isinstance(inner, dict) else data.get("original_tokens", 0)
-    compressed_tokens = inner.get("compressed_tokens", 0) if isinstance(inner, dict) else data.get("compressed_tokens", 0)
-    tokens_saved = original_tokens - compressed_tokens if original_tokens else 0
-    compression_ratio = (
-        compressed_tokens / original_tokens if original_tokens > 0 else 0.0
+    original_tokens = (
+        inner.get("original_tokens", 0)
+        if isinstance(inner, dict)
+        else data.get("original_tokens", 0)
     )
+    compressed_tokens = (
+        inner.get("compressed_tokens", 0)
+        if isinstance(inner, dict)
+        else data.get("compressed_tokens", 0)
+    )
+    tokens_saved = original_tokens - compressed_tokens if original_tokens else 0
+    compression_ratio = compressed_tokens / original_tokens if original_tokens > 0 else 0.0
 
     summary = CompressionSummary(
         compression_ratio=round(compression_ratio, 4),
@@ -1218,8 +1191,7 @@ def _build_quality_report(
         # Estimate graph completeness from relation/entity ratio
         if kg_section.summary.total_entities > 0:
             ratio = min(
-                kg_section.summary.total_relations
-                / kg_section.summary.total_entities,
+                kg_section.summary.total_relations / kg_section.summary.total_entities,
                 1.0,
             )
             confidence.graph_completeness = round(ratio, 4)

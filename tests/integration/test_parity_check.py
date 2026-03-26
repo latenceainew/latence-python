@@ -35,17 +35,18 @@ import pytest
 
 from latence import Latence
 
-
 # ---------------------------------------------------------------------------
 # Skip if required env vars are not set
 # ---------------------------------------------------------------------------
 pytestmark = pytest.mark.skipif(
-    not all([
-        os.environ.get("LATENCE_API_KEY"),
-        os.environ.get("PORTAL_PIPELINE_URL"),
-        os.environ.get("SUPABASE_URL"),
-        os.environ.get("SUPABASE_KEY"),
-    ]),
+    not all(
+        [
+            os.environ.get("LATENCE_API_KEY"),
+            os.environ.get("PORTAL_PIPELINE_URL"),
+            os.environ.get("SUPABASE_URL"),
+            os.environ.get("SUPABASE_KEY"),
+        ]
+    ),
     reason="Requires LATENCE_API_KEY, PORTAL_PIPELINE_URL, SUPABASE_URL, SUPABASE_KEY",
 )
 
@@ -163,39 +164,60 @@ class TestSDKPortalParity:
         print(f"\n  SDK status: {sdk_db['status']}, Portal status: {portal_db['status']}")
 
         # Both should succeed
-        assert sdk_db["status"] in ("COMPLETED", "CACHED"), \
+        assert sdk_db["status"] in ("COMPLETED", "CACHED"), (
             f"SDK job failed: {sdk_db.get('error_message')}"
-        assert portal_db["status"] in ("COMPLETED", "CACHED"), \
+        )
+        assert portal_db["status"] in ("COMPLETED", "CACHED"), (
             f"Portal job failed: {portal_db.get('error_message')}"
+        )
 
         # Same number of stages
-        assert sdk_db["total_stages"] == portal_db["total_stages"], \
-            f"Stage count mismatch: SDK={sdk_db['total_stages']}, Portal={portal_db['total_stages']}"
+        assert sdk_db["total_stages"] == portal_db["total_stages"], (
+            f"Stage count mismatch: SDK={sdk_db['total_stages']},"
+            f" Portal={portal_db['total_stages']}"
+        )
         assert sdk_db["stages_completed"] == portal_db["stages_completed"]
 
         # Same services executed
-        sdk_services = json.loads(sdk_db["services"]) if isinstance(sdk_db["services"], str) else sdk_db["services"]
-        portal_services = json.loads(portal_db["services"]) if isinstance(portal_db["services"], str) else portal_db["services"]
+        sdk_services = (
+            json.loads(sdk_db["services"])
+            if isinstance(sdk_db["services"], str)
+            else sdk_db["services"]
+        )
+        portal_services = (
+            json.loads(portal_db["services"])
+            if isinstance(portal_db["services"], str)
+            else portal_db["services"]
+        )
 
         sdk_service_names = [s["service"] for s in sdk_services]
         portal_service_names = [s["service"] for s in portal_services]
-        assert sdk_service_names == portal_service_names, \
+        assert sdk_service_names == portal_service_names, (
             f"Service order mismatch: SDK={sdk_service_names}, Portal={portal_service_names}"
+        )
 
         # Correct submitted_via
         assert sdk_db["submitted_via"] == "sdk"
         assert portal_db["submitted_via"] == "portal"
 
         # Stage timings populated for both
-        sdk_timings = json.loads(sdk_db["stage_timings"]) if isinstance(sdk_db.get("stage_timings"), str) else sdk_db.get("stage_timings", [])
-        portal_timings = json.loads(portal_db["stage_timings"]) if isinstance(portal_db.get("stage_timings"), str) else portal_db.get("stage_timings", [])
+        sdk_timings = (
+            json.loads(sdk_db["stage_timings"])
+            if isinstance(sdk_db.get("stage_timings"), str)
+            else sdk_db.get("stage_timings", [])
+        )
+        portal_timings = (
+            json.loads(portal_db["stage_timings"])
+            if isinstance(portal_db.get("stage_timings"), str)
+            else portal_db.get("stage_timings", [])
+        )
         assert len(sdk_timings) == len(portal_timings), "Timing count mismatch"
 
         # B2 keys populated for both
         assert sdk_db.get("final_b2_key"), "SDK job missing B2 key"
         assert portal_db.get("final_b2_key"), "Portal job missing B2 key"
 
-        print(f"\n  PARITY CHECK PASSED")
+        print("\n  PARITY CHECK PASSED")
         print(f"  Services: {sdk_service_names}")
         print(f"  Stages: {sdk_db['stages_completed']}/{sdk_db['total_stages']}")
         print(f"  SDK cost: ${sdk_db.get('total_cost_usd', 0)}")

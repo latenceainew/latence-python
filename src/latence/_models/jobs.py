@@ -8,7 +8,6 @@ from pydantic import Field
 
 from .common import BaseResponse
 
-
 JobStatus = Literal[
     "QUEUED",
     "IN_PROGRESS",
@@ -40,9 +39,7 @@ class JobStatusResponse(BaseResponse):
     output_url: str | None = Field(
         default=None, description="Presigned URL to fetch results (if B2-cached)"
     )
-    output_expires_at: str | None = Field(
-        default=None, description="When output_url expires"
-    )
+    output_expires_at: str | None = Field(default=None, description="When output_url expires")
     output_size_bytes: int | None = Field(default=None, description="Size of cached result")
     created_at: str | None = Field(default=None, description="Job creation timestamp")
     completed_at: str | None = Field(default=None, description="Job completion timestamp")

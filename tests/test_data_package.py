@@ -5,8 +5,6 @@ from __future__ import annotations
 import zipfile
 from pathlib import Path
 
-import pytest
-
 from latence._models.pipeline import (
     PipelineExecutionSummary,
     PipelineResultResponse,
@@ -80,7 +78,12 @@ def test_from_pipeline_result_with_all_stages() -> None:
                     "relations": [
                         {
                             "entity1": {"text": "Apple", "label": "ORG", "start": 0, "end": 5},
-                            "entity2": {"text": "Cupertino", "label": "LOC", "start": 10, "end": 18},
+                            "entity2": {
+                                "text": "Cupertino",
+                                "label": "LOC",
+                                "start": 10,
+                                "end": 18,
+                            },
                             "relation_type": "headquartered_in",
                             "relation_label": "headquartered_in",
                             "score": 0.88,
@@ -243,7 +246,9 @@ def test_download_archive_produces_valid_zip(tmp_path: Path) -> None:
             "extraction": StageResult(
                 service="extraction",
                 status="completed",
-                output={"entities": [{"text": "X", "label": "ORG", "score": 0.9, "start": 0, "end": 1}]},
+                output={
+                    "entities": [{"text": "X", "label": "ORG", "score": 0.9, "start": 0, "end": 1}]
+                },
             ),
         },
     )
@@ -293,7 +298,10 @@ def test_parse_warnings_for_malformed_relations() -> None:
                             "score": 0.9,
                         },
                         # Malformed: missing required entity1
-                        {"entity2": {"text": "B", "label": "LOC", "start": 2, "end": 3}, "score": 0.8},
+                        {
+                            "entity2": {"text": "B", "label": "LOC", "start": 2, "end": 3},
+                            "score": 0.8,
+                        },
                     ],
                 },
             ),

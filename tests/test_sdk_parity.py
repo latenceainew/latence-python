@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from latence._base import APIResponse, ResponseMetadata
 import base64
 import struct
 
+from latence._base import APIResponse, ResponseMetadata
 from latence.resources.document_intelligence import DocumentIntelligence
 from latence.resources.embedding import Embedding
 

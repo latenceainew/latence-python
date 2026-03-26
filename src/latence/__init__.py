@@ -91,6 +91,42 @@ from ._exceptions import (
 # Logging
 from ._logging import setup_logging
 
+# Models - commonly used types
+from ._models import (
+    # Responses
+    BuildGraphResponse,
+    ChunkResponse,
+    ColBERTEmbedResponse,
+    ColPaliEmbedResponse,
+    CompressMessagesResponse,
+    CompressResponse,
+    CreditsResponse,
+    DetectPIIResponse,
+    EmbedResponse,
+    # Unified Embed
+    EmbedType,
+    EnrichResponse,
+    # Common
+    Entity,
+    ExtractResponse,
+    JobStatusResponse,
+    JobSubmittedResponse,
+    KnowledgeGraph,
+    Message,
+    # Pipeline
+    PipelineConfig,
+    PipelineReport,
+    PipelineResultResponse,
+    PipelineSubmitResponse,
+    ProcessDocumentResponse,
+    Relation,
+    ServiceConfig,
+    StageDownload,
+    StageStatus,
+    UnifiedEmbedResponse,
+    Usage,
+)
+
 # Pipeline (primary interface)
 from ._pipeline import (
     AsyncJob,
@@ -98,42 +134,6 @@ from ._pipeline import (
     Job,
     PipelineBuilder,
     PipelineValidationError,
-)
-
-# Models - commonly used types
-from ._models import (
-    # Common
-    Entity,
-    KnowledgeGraph,
-    Message,
-    Relation,
-    Usage,
-    # Unified Embed
-    EmbedType,
-    UnifiedEmbedResponse,
-    # Responses
-    BuildGraphResponse,
-    ColBERTEmbedResponse,
-    ColPaliEmbedResponse,
-    ChunkResponse,
-    CompressMessagesResponse,
-    CompressResponse,
-    CreditsResponse,
-    EnrichResponse,
-    DetectPIIResponse,
-    EmbedResponse,
-    ExtractResponse,
-    JobStatusResponse,
-    JobSubmittedResponse,
-    ProcessDocumentResponse,
-    # Pipeline
-    PipelineConfig,
-    PipelineReport,
-    PipelineResultResponse,
-    PipelineSubmitResponse,
-    ServiceConfig,
-    StageDownload,
-    StageStatus,
 )
 
 __all__ = [

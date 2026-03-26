@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from .common import BaseResponse, Usage
 
-
 # =============================================================================
 # V2 REQUEST OPTIONS
 # =============================================================================
@@ -32,7 +31,8 @@ class PipelineOptions(BaseModel):
         default=None, description="Enable seal recognition. Default: false"
     )
     use_doc_orientation_classify: bool | None = Field(
-        default=None, description="Enable document orientation classification (auto-rotate). Default: true"
+        default=None,
+        description="Enable document orientation classification (auto-rotate). Default: true",
     )
     use_doc_unwarping: bool | None = Field(
         default=None, description="Enable text image rectification (dewarp). Default: false"
@@ -48,16 +48,29 @@ class PipelineOptions(BaseModel):
     )
     markdown_ignore_labels: list[str] | None = Field(
         default=None,
-        description="Layout labels to ignore in Markdown output (e.g., ['number', 'footnote', 'header', 'footer'])",
+        description=(
+            "Layout labels to ignore in Markdown output"
+            " (e.g., ['number', 'footnote', 'header', 'footer'])"
+        ),
     )
     use_queues: bool | None = Field(
         default=None, description="Enable async internal queues for efficiency. Default: true"
     )
     enable_hpi: bool | None = Field(
-        default=None, description="Deprecated -- ignored by the backend (vLLM serves the model directly). Kept for backward compatibility."
+        default=None,
+        description=(
+            "Deprecated -- ignored by the backend"
+            " (vLLM serves the model directly)."
+            " Kept for backward compatibility."
+        ),
     )
     precision: str | None = Field(
-        default=None, description="Deprecated -- ignored by the backend (vLLM manages precision automatically). Kept for backward compatibility."
+        default=None,
+        description=(
+            "Deprecated -- ignored by the backend"
+            " (vLLM manages precision automatically)."
+            " Kept for backward compatibility."
+        ),
     )
 
 
@@ -72,7 +85,10 @@ class PredictOptions(BaseModel):
     # Layout detection options
     layout_threshold: float | dict[int, float] | None = Field(
         default=None,
-        description="Score threshold (0-1) for layout detection, or per-class dict {cls_id: threshold}. Default: 0.3",
+        description=(
+            "Score threshold (0-1) for layout detection,"
+            " or per-class dict {cls_id: threshold}. Default: 0.3"
+        ),
     )
     layout_nms: bool | None = Field(
         default=None, description="Use NMS post-processing for layout detection. Default: true"
@@ -90,9 +106,7 @@ class PredictOptions(BaseModel):
     repetition_penalty: float | None = Field(
         default=None, description="Repetition penalty for VLM sampling"
     )
-    max_new_tokens: int | None = Field(
-        default=None, description="Maximum tokens to generate"
-    )
+    max_new_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
 
     # Image preprocessing
     min_pixels: int | None = Field(
@@ -102,7 +116,12 @@ class PredictOptions(BaseModel):
         default=None, description="Maximum pixels for VLM image preprocessing"
     )
     vl_rec_max_concurrency: int | None = Field(
-        default=None, description="Deprecated -- ignored by the backend (vLLM handles concurrency internally). Kept for backward compatibility."
+        default=None,
+        description=(
+            "Deprecated -- ignored by the backend"
+            " (vLLM handles concurrency internally)."
+            " Kept for backward compatibility."
+        ),
     )
 
 
@@ -114,9 +133,7 @@ class OutputOptions(BaseModel):
     data is included in the response.
     """
 
-    pretty: bool = Field(
-        default=True, description="Beautify markdown output (center charts, etc.)"
-    )
+    pretty: bool = Field(default=True, description="Beautify markdown output (center charts, etc.)")
     show_formula_number: bool = Field(
         default=False, description="Include formula numbers in markdown output"
     )

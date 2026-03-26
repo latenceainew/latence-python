@@ -12,10 +12,8 @@ from latence._models.pipeline import (
     PipelineConfig,
     PipelineResultResponse,
     PipelineStatusResponse,
-    PipelineExecutionSummary,
     ServiceConfig,
 )
-
 
 # ---------------------------------------------------------------------------
 # PipelineResultResponse
@@ -309,13 +307,9 @@ class TestRelation:
 
     def test_valid_confidence_boundaries(self) -> None:
         """Relation with confidence 0.0 and 1.0 should parse successfully."""
-        r0 = Relation(
-            source_entity="A", target_entity="B", relation_type="R", confidence=0.0
-        )
+        r0 = Relation(source_entity="A", target_entity="B", relation_type="R", confidence=0.0)
         assert r0.confidence == 0.0
-        r1 = Relation(
-            source_entity="A", target_entity="B", relation_type="R", confidence=1.0
-        )
+        r1 = Relation(source_entity="A", target_entity="B", relation_type="R", confidence=1.0)
         assert r1.confidence == 1.0
 
     def test_confidence_above_one_raises_validation_error(self) -> None:

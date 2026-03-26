@@ -8,7 +8,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .common import BaseResponse, Entity, Usage
 
-
 # Service type literals
 ServiceName = Literal[
     "document_intelligence",
@@ -48,12 +47,8 @@ class ServiceConfig(BaseModel):
 class PipelineConfig(BaseModel):
     """Pipeline execution configuration."""
 
-    services: list[ServiceConfig] = Field(
-        description="Ordered list of services to execute"
-    )
-    store_intermediate: bool = Field(
-        default=False, description="Store results from each stage"
-    )
+    services: list[ServiceConfig] = Field(description="Ordered list of services to execute")
+    store_intermediate: bool = Field(default=False, description="Store results from each stage")
     strict_mode: bool = Field(
         default=False, description="Error on validation failure instead of auto-injecting services"
     )
@@ -129,7 +124,9 @@ class StageDownload(BaseModel):
     files_failed: int = Field(default=0, description="Files that failed")
     cost_usd: float = Field(default=0.0, description="Cost in USD for this stage")
     duration_s: float = Field(default=0.0, description="Duration in seconds")
-    from_checkpoint: bool = Field(default=False, description="Whether this stage was loaded from checkpoint")
+    from_checkpoint: bool = Field(
+        default=False, description="Whether this stage was loaded from checkpoint"
+    )
 
 
 class PipelineReport(BaseModel):
@@ -175,8 +172,12 @@ class PipelineStatusResponse(BaseResponse):
     error_message: str | None = Field(default=None, description="Error message if failed")
     message: str | None = Field(default=None, description="Status message")
     is_resumable: bool = Field(default=False, description="Whether the pipeline can be resumed")
-    resume_count: int = Field(default=0, description="Number of times this pipeline has been resumed")
-    pipeline_report: PipelineReport | None = Field(default=None, description="Structured pipeline report")
+    resume_count: int = Field(
+        default=0, description="Number of times this pipeline has been resumed"
+    )
+    pipeline_report: PipelineReport | None = Field(
+        default=None, description="Structured pipeline report"
+    )
     failed_stage: str | None = Field(default=None, description="Stage where pipeline failed")
 
 
@@ -194,9 +195,7 @@ class PipelineResultResponse(BaseResponse):
     intermediate_results: dict[str, StageResult] | None = Field(
         default=None, description="Results from each stage (if store_intermediate=True)"
     )
-    execution_summary: PipelineExecutionSummary = Field(
-        description="Summary of pipeline execution"
-    )
+    execution_summary: PipelineExecutionSummary = Field(description="Summary of pipeline execution")
     output_url: str | None = Field(
         default=None, description="Presigned URL to fetch results (if B2-cached)"
     )
@@ -221,9 +220,5 @@ class PipelineValidationResult(BaseModel):
     auto_injected: list[str] = Field(
         default_factory=list, description="Services that were auto-injected"
     )
-    errors: list[str] = Field(
-        default_factory=list, description="Validation error messages"
-    )
-    warnings: list[str] = Field(
-        default_factory=list, description="Validation warning messages"
-    )
+    errors: list[str] = Field(default_factory=list, description="Validation error messages")
+    warnings: list[str] = Field(default_factory=list, description="Validation warning messages")

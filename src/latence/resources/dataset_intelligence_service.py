@@ -120,7 +120,8 @@ class DatasetIntelligenceService(SyncResource):
     ) -> DatasetIntelligenceResponse:
         """Tier 1: Semantic enrichment (CPU-only, fast)."""
         return self._process(
-            "tier1", input_data,
+            "tier1",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,
@@ -159,7 +160,8 @@ class DatasetIntelligenceService(SyncResource):
     ) -> Union[DatasetIntelligenceResponse, JobSubmittedResponse]:
         """Tier 2: Knowledge graph construction (GPU, entity linking + RotatE)."""
         return self._process(
-            "tier2", input_data,
+            "tier2",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,
@@ -176,7 +178,8 @@ class DatasetIntelligenceService(SyncResource):
     ) -> DatasetIntelligenceResponse:
         """Tier 3: Ontology induction (concept clustering + SHACL shapes)."""
         return self._process(
-            "tier3", input_data,
+            "tier3",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,
@@ -215,7 +218,8 @@ class DatasetIntelligenceService(SyncResource):
     ) -> Union[DatasetIntelligenceResponse, JobSubmittedResponse]:
         """Full pipeline: all 3 tiers."""
         return self._process(
-            "full", input_data,
+            "full",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,
@@ -296,7 +300,8 @@ class AsyncDatasetIntelligenceService(AsyncResource):
     ) -> DatasetIntelligenceResponse:
         """Tier 1: Semantic enrichment (CPU-only, fast)."""
         return await self._process(
-            "tier1", input_data,
+            "tier1",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,
@@ -335,7 +340,8 @@ class AsyncDatasetIntelligenceService(AsyncResource):
     ) -> Union[DatasetIntelligenceResponse, JobSubmittedResponse]:
         """Tier 2: Knowledge graph construction (GPU, entity linking + RotatE)."""
         return await self._process(
-            "tier2", input_data,
+            "tier2",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,
@@ -352,7 +358,8 @@ class AsyncDatasetIntelligenceService(AsyncResource):
     ) -> DatasetIntelligenceResponse:
         """Tier 3: Ontology induction (concept clustering + SHACL shapes)."""
         return await self._process(
-            "tier3", input_data,
+            "tier3",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,
@@ -391,7 +398,8 @@ class AsyncDatasetIntelligenceService(AsyncResource):
     ) -> Union[DatasetIntelligenceResponse, JobSubmittedResponse]:
         """Full pipeline: all 3 tiers."""
         return await self._process(
-            "full", input_data,
+            "full",
+            input_data,
             dataset_id=dataset_id,
             config_overrides=config_overrides,
             request_id=request_id,

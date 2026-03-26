@@ -20,7 +20,7 @@ from ._constants import (
 from ._logging import log_retry
 
 if TYPE_CHECKING:
-    from ._base import APIResponse
+    pass
 
 T = TypeVar("T")
 
@@ -83,7 +83,7 @@ class RetryConfig:
             return min(retry_after, self.max_delay)
 
         # Exponential backoff: initial_delay * (base ^ attempt)
-        delay = self.initial_delay * (self.exponential_base ** attempt)
+        delay = self.initial_delay * (self.exponential_base**attempt)
 
         # Apply jitter: delay * (1 - jitter + random * 2 * jitter)
         # This gives us delay ± jitter%

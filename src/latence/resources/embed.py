@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, BinaryIO, Literal, Union, overload
 
 from .._models import JobSubmittedResponse
-from .._models.embed import EmbedType, UnifiedEmbedResponse
+from .._models.embed import UnifiedEmbedResponse
 from .._utils import image_to_base64
 from ._base import AsyncResource, SyncResource
 

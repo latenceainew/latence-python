@@ -17,9 +17,7 @@ class RedactionConfig(BaseModel):
     )
     threshold: float = Field(default=0.3, description="Confidence threshold")
     redact: bool = Field(default=False, description="Whether to redact PII")
-    redaction_mode: Literal["mask", "replace"] = Field(
-        default="mask", description="Redaction mode"
-    )
+    redaction_mode: Literal["mask", "replace"] = Field(default="mask", description="Redaction mode")
     chunk_size: int = Field(default=1024, description="Chunk size in tokens")
     enable_refinement: bool = Field(default=False, description="Enable refinement")
     refinement_threshold: float = Field(default=0.5, description="Refinement threshold")

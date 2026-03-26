@@ -6,10 +6,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .common import BaseResponse, Usage
 
-
 # ---------------------------------------------------------------------------
 # Chunk item
 # ---------------------------------------------------------------------------
+
 
 class ChunkItem(BaseModel):
     """A single chunk with structural metadata."""
@@ -33,6 +33,7 @@ class ChunkItem(BaseModel):
 # ---------------------------------------------------------------------------
 # Chunk response
 # ---------------------------------------------------------------------------
+
 
 class ChunkData(BaseModel):
     """Data payload for chunk response."""

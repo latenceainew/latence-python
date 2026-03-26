@@ -8,14 +8,14 @@ from typing import Any, TypeVar
 import httpx
 
 from ._constants import DEFAULT_BASE_URL, DEFAULT_MAX_RETRIES, DEFAULT_TIMEOUT
-from ._version import VERSION
 from ._exceptions import (
     APIConnectionError,
     APITimeoutError,
     _create_api_error,
 )
 from ._logging import log_request, log_response
-from ._retry import AsyncRetryHandler, RetryConfig, SyncRetryHandler, get_retry_after
+from ._retry import AsyncRetryHandler, RetryConfig, SyncRetryHandler
+from ._version import VERSION
 
 T = TypeVar("T")
 
@@ -118,7 +118,8 @@ def _parse_api_response(response: httpx.Response) -> APIResponse:
     error_code = data.get("error") if isinstance(data, dict) else None
     message = (
         (data.get("message") or data.get("error") or response.reason_phrase or "Unknown error")
-        if isinstance(data, dict) else str(data)
+        if isinstance(data, dict)
+        else str(data)
     )
     request_id = data.get("request_id") if isinstance(data, dict) else None
 

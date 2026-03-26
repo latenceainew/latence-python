@@ -21,6 +21,7 @@ class ChunkResponse(BaseResponse):
 # Feature sub-models (per-chunk + aggregate patterns)
 # ---------------------------------------------------------------------------
 
+
 class QualityPerChunk(BaseModel):
     """Per-chunk quality metrics."""
 
@@ -123,9 +124,7 @@ class SemanticAggregate(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    role_distribution: dict[str, float] = Field(
-        description="Distribution of rhetorical roles"
-    )
+    role_distribution: dict[str, float] = Field(description="Distribution of rhetorical roles")
     mean_centrality: float = Field(description="Mean centrality score")
 
 
@@ -191,6 +190,7 @@ class ZipfFeature(BaseModel):
 # Aggregate-only feature groups
 # ---------------------------------------------------------------------------
 
+
 class CoherenceFeature(BaseModel):
     """Coherence feature group (aggregate only — inter-chunk similarity)."""
 
@@ -210,9 +210,7 @@ class SpectralFeature(BaseModel):
     effective_rank: float = Field(description="Effective rank of embedding matrix")
     num_chunks: int = Field(description="Number of chunks in analysis")
     rank_ratio: float = Field(description="Effective rank / num_chunks")
-    top_singular_values: list[float] = Field(
-        description="Top singular values from SVD"
-    )
+    top_singular_values: list[float] = Field(description="Top singular values from SVD")
 
 
 class DriftFeature(BaseModel):
@@ -220,13 +218,9 @@ class DriftFeature(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    similarities: list[float] = Field(
-        description="Cosine similarity between consecutive chunks"
-    )
+    similarities: list[float] = Field(description="Cosine similarity between consecutive chunks")
     mean_similarity: float = Field(description="Mean consecutive similarity")
-    major_breaks: list[int] = Field(
-        description="Chunk indices where major topic drift occurs"
-    )
+    major_breaks: list[int] = Field(description="Chunk indices where major topic drift occurs")
     num_major_breaks: int = Field(description="Number of major topic breaks")
 
 
@@ -246,6 +240,7 @@ class RedundancyFeature(BaseModel):
 # ---------------------------------------------------------------------------
 # Enrich response (task=enrich)
 # ---------------------------------------------------------------------------
+
 
 class EnrichData(BaseModel):
     """Data payload for enrich response."""

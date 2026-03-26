@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING, BinaryIO, Literal, Union, overload
-import re
 
 try:
     from bs4 import BeautifulSoup
+
     HAS_BEAUTIFULSOUP = True
 except ImportError:
     HAS_BEAUTIFULSOUP = False
@@ -149,7 +150,8 @@ class DocumentIntelligence(SyncResource):
             return_job: If True, return job_id for polling (recommended for large files)
 
         Returns:
-            ProcessDocumentResponse with extracted content, or JobSubmittedResponse if return_job=True
+            ProcessDocumentResponse with extracted content,
+            or JobSubmittedResponse if return_job=True
         """
         # Handle file_path: auto-detect large files for presigned upload
         if file_path is not None:
@@ -395,7 +397,8 @@ class AsyncDocumentIntelligence(AsyncResource):
             return_job: If True, return job_id for polling (recommended for large files)
 
         Returns:
-            ProcessDocumentResponse with extracted content, or JobSubmittedResponse if return_job=True
+            ProcessDocumentResponse with extracted content,
+            or JobSubmittedResponse if return_job=True
         """
         # Handle file_path: auto-detect large files for presigned upload
         if file_path is not None:
@@ -565,18 +568,18 @@ def clean_markdown(text: str) -> str:
 
     if not HAS_BEAUTIFULSOUP:
         # Fallback to simple regex if BS4 is not available
-        return re.sub(r'<img[^>]+>', '', text)
+        return re.sub(r"<img[^>]+>", "", text)
 
     try:
-        soup = BeautifulSoup(text, 'html.parser')
+        soup = BeautifulSoup(text, "html.parser")
 
         # Remove all img tags
-        for img in soup.find_all('img'):
+        for img in soup.find_all("img"):
             img.decompose()
 
         # Remove div tags but PRESERVE tables
-        for div in soup.find_all('div'):
-            if div.find('table'):
+        for div in soup.find_all("div"):
+            if div.find("table"):
                 div.unwrap()  # Remove div tag, keep table content
             else:
                 div.decompose()  # Remove div and its content (noise)
@@ -585,7 +588,7 @@ def clean_markdown(text: str) -> str:
         text = str(soup)
 
         # Collapse multiple spaces/newlines
-        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
 
         return text
     except Exception:

@@ -13,7 +13,7 @@ logger = logging.getLogger("latence.pipeline")
 
 class PipelineBuilder:
     """Build and configure pipelines with a fluent API.
-    
+
     Example:
         >>> pipeline = (
         ...     PipelineBuilder()
@@ -194,7 +194,7 @@ class PipelineBuilder:
         **kwargs: Any,
     ) -> "PipelineBuilder":
         """Add Entity Extraction service.
-        
+
         Args:
             threshold: Confidence threshold (0-1)
             user_labels: List of entity labels to extract
@@ -206,7 +206,7 @@ class PipelineBuilder:
             flat_ner: Disable nested entities
             multi_label: Allow multiple labels per span
             **kwargs: Additional configuration options
-        
+
         Returns:
             Self for method chaining
         """
@@ -248,7 +248,7 @@ class PipelineBuilder:
         **kwargs: Any,
     ) -> "PipelineBuilder":
         """Add Relation Extraction service for knowledge graph construction.
-        
+
         Args:
             resolve_entities: Merge duplicate entities using hybrid similarity + embeddings.
             optimize_relations: Refine relation labels for better semantic accuracy.
@@ -256,7 +256,7 @@ class PipelineBuilder:
             relation_threshold: Confidence threshold for relations (0.0-1.0).
             kg_output_format: Output format ("custom", "property_graph", "rdf").
             **kwargs: Additional configuration options.
-        
+
         Returns:
             Self for method chaining
         """
@@ -334,7 +334,7 @@ class PipelineBuilder:
         **kwargs: Any,
     ) -> "PipelineBuilder":
         """Add compression service for context compression.
-        
+
         Args:
             compression_rate: Target compression ratio (0-1)
             force_preserve_digit: Preserve digits
@@ -343,7 +343,7 @@ class PipelineBuilder:
             chunk_size: Chunk size in tokens
             fallback_mode: Enable fallback for edge cases
             **kwargs: Additional configuration options
-        
+
         Returns:
             Self for method chaining
         """
@@ -357,10 +357,10 @@ class PipelineBuilder:
             "fallback_mode": fallback_mode,
             **kwargs,
         }
-        
+
         if force_tokens:
             config["force_tokens"] = force_tokens
-        
+
         return self.add("compression", **config)
 
     # =========================================================================
@@ -443,12 +443,12 @@ class PipelineBuilder:
         **kwargs: Any,
     ) -> "PipelineBuilder":
         """Add embedding service for dense vector embeddings.
-        
+
         Args:
             dimension: Embedding dimension (256, 512, 768, or 1024)
             encoding_format: Output format ("float" or "base64")
             **kwargs: Additional configuration options
-        
+
         Returns:
             Self for method chaining
         """
@@ -475,12 +475,12 @@ class PipelineBuilder:
         **kwargs: Any,
     ) -> "PipelineBuilder":
         """Add ColBERT service for token-level embeddings.
-        
+
         Args:
             is_query: Whether this is a query (vs document) embedding
             query_expansion: Enable query expansion for better recall
             **kwargs: Additional configuration options
-        
+
         Returns:
             Self for method chaining
         """
@@ -501,11 +501,11 @@ class PipelineBuilder:
         **kwargs: Any,
     ) -> "PipelineBuilder":
         """Add ColPali service for visual embeddings.
-        
+
         Args:
             is_query: Whether this is a query embedding
             **kwargs: Additional configuration options
-        
+
         Returns:
             Self for method chaining
         """
@@ -521,13 +521,13 @@ class PipelineBuilder:
 
     def store_intermediate(self, enabled: bool = True) -> "PipelineBuilder":
         """Store results from each pipeline stage.
-        
+
         When enabled, intermediate results from each service will be
         stored and available in the final result.
-        
+
         Args:
             enabled: Whether to store intermediate results
-        
+
         Returns:
             Self for method chaining
         """
@@ -536,10 +536,10 @@ class PipelineBuilder:
 
     def strict(self) -> "PipelineBuilder":
         """Enable strict mode (no auto-injection of services).
-        
+
         In strict mode, the pipeline will raise an error if validation
         fails, rather than automatically injecting missing services.
-        
+
         Returns:
             Self for method chaining
         """
@@ -569,13 +569,14 @@ class PipelineBuilder:
         Raises:
             PipelineValidationError: In strict mode when validation fails.
         """
-        from .validator import validate_pipeline, PipelineValidationError
         from .._models.pipeline import PipelineInput
+        from .validator import validate_pipeline
 
         services = list(self._services)
 
         if not services and input_type == "file":
             from .spec import DEFAULT_INTELLIGENCE_PIPELINE
+
             services = list(DEFAULT_INTELLIGENCE_PIPELINE)
 
         config = PipelineConfig(
@@ -591,6 +592,7 @@ class PipelineBuilder:
             fake_input = PipelineInput(entities=[])
         elif input_type == "file":
             from .._models.pipeline import FileInput
+
             fake_input = PipelineInput(files=[FileInput(base64="<placeholder>")])
 
         result = validate_pipeline(config, fake_input)

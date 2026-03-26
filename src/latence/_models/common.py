@@ -73,9 +73,7 @@ class BaseResponse(BaseModel):
 
     # Response metadata from headers (injected by client)
     credits_used: float | None = Field(default=None, description="Credits used for this request")
-    credits_remaining: float | None = Field(
-        default=None, description="Remaining credit balance"
-    )
+    credits_remaining: float | None = Field(default=None, description="Remaining credit balance")
     rate_limit_remaining: int | None = Field(
         default=None, description="Remaining requests in rate limit window"
     )

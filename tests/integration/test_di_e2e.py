@@ -32,8 +32,8 @@ import pytest
 
 from latence import Latence
 from latence._models.dataset_intelligence_service import (
-    DatasetIntelligenceResponse,
     DatasetIntelligenceDeltaSummary,
+    DatasetIntelligenceResponse,
     DatasetIntelligenceUsage,
 )
 from latence._models.jobs import JobSubmittedResponse
@@ -155,8 +155,7 @@ class TestDatasetCreation:
         result = _poll_pipeline_job(client, job_id)
 
         assert result["status"] == "COMPLETED", (
-            f"Expected COMPLETED, got {result['status']}: "
-            f"{result.get('error_message', 'no error')}"
+            f"Expected COMPLETED, got {result['status']}: {result.get('error_message', 'no error')}"
         )
         print(f"[DI E2E] Job completed: {job_id}")
 
@@ -265,7 +264,7 @@ class TestDeltaIngestion:
         assert isinstance(parsed.delta_summary, DatasetIntelligenceDeltaSummary)
 
         ds = parsed.delta_summary
-        print(f"[DI E2E] Delta summary:")
+        print("[DI E2E] Delta summary:")
         print(f"  files_added={ds.files_added}, files_unchanged={ds.files_unchanged}")
         print(f"  new_entities={ds.new_entities}, merged_entities={ds.merged_entities}")
         print(f"  new_edges={ds.new_edges}, removed_edges={ds.removed_edges}")
@@ -281,8 +280,7 @@ class TestTierMethods:
             result = di.enrich(input_data=pipeline_payload)
             assert isinstance(result, DatasetIntelligenceResponse)
             assert result.tier == "tier1"
-            print(f"[DI E2E] enrich() returned: tier={result.tier}, "
-                  f"credits={result.usage.credits}")
+            print(f"[DI E2E] enrich() returned: tier={result.tier}, credits={result.usage.credits}")
         except Exception as e:
             if "timeout" in str(e).lower() or "504" in str(e):
                 pytest.skip(f"Tier1 sync call timed out (expected for large payloads): {e}")
@@ -306,8 +304,10 @@ class TestTierMethods:
             result = di.build_ontology(input_data=pipeline_payload)
             assert isinstance(result, DatasetIntelligenceResponse)
             assert result.tier == "tier3"
-            print(f"[DI E2E] build_ontology() returned: tier={result.tier}, "
-                  f"credits={result.usage.credits}")
+            print(
+                f"[DI E2E] build_ontology() returned: tier={result.tier}, "
+                f"credits={result.usage.credits}"
+            )
         except Exception as e:
             if "timeout" in str(e).lower() or "504" in str(e):
                 pytest.skip(f"Tier3 sync call timed out (expected for large payloads): {e}")
@@ -332,7 +332,9 @@ class TestB2PresignedUpload:
         """The example data should exceed the 8 MB inline threshold."""
         size = len(json.dumps(pipeline_payload, default=str).encode())
         threshold = 8 * 1024 * 1024
-        print(f"[DI E2E] Payload: {size / 1024 / 1024:.1f} MB, threshold: {threshold / 1024 / 1024:.0f} MB")
+        size_mb = size / 1024 / 1024
+        thresh_mb = threshold / 1024 / 1024
+        print(f"[DI E2E] Payload: {size_mb:.1f} MB, threshold: {thresh_mb:.0f} MB")
         assert size > threshold, (
             f"Payload ({size / 1024 / 1024:.1f} MB) should exceed "
             f"{threshold / 1024 / 1024:.0f} MB threshold for presigned upload test"
@@ -372,8 +374,10 @@ class TestResponseModels:
         u = parsed.usage
         assert isinstance(u.credits, float)
         assert isinstance(u.details, dict)
-        print(f"[DI E2E] Usage: credits={u.credits}, "
-              f"calculation='{u.calculation}', details keys={list(u.details.keys())}")
+        print(
+            f"[DI E2E] Usage: credits={u.credits}, "
+            f"calculation='{u.calculation}', details keys={list(u.details.keys())}"
+        )
 
     def test_stage_timings(self):
         """Stage timings are populated."""

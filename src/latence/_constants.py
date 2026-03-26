@@ -18,14 +18,16 @@ DEFAULT_EXPONENTIAL_BASE = 2.0
 DEFAULT_JITTER = 0.25  # 25% jitter
 
 # Retryable HTTP status codes
-RETRYABLE_STATUS_CODES = frozenset({
-    408,  # Request Timeout
-    429,  # Too Many Requests (Rate Limited)
-    500,  # Internal Server Error
-    502,  # Bad Gateway
-    503,  # Service Unavailable
-    504,  # Gateway Timeout
-})
+RETRYABLE_STATUS_CODES = frozenset(
+    {
+        408,  # Request Timeout
+        429,  # Too Many Requests (Rate Limited)
+        500,  # Internal Server Error
+        502,  # Bad Gateway
+        503,  # Service Unavailable
+        504,  # Gateway Timeout
+    }
+)
 
 # B2 storage fetch timeouts
 B2_FETCH_TIMEOUT = 60.0  # Jobs resource B2 fetch timeout

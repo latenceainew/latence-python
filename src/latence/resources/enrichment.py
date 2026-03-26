@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Union, overload
+from typing import TYPE_CHECKING, Literal, Union, overload
 
 from .._models import JobSubmittedResponse
 from .._models.enrichment import ChunkResponse, EnrichResponse

@@ -2,10 +2,8 @@
 
 import pytest
 
-from latence._models.pipeline import PipelineConfig, ServiceConfig
 from latence._pipeline.builder import PipelineBuilder
 from latence._pipeline.validator import PipelineValidationError
-
 
 # =============================================================================
 # Smart defaults and auto-injection
@@ -13,7 +11,7 @@ from latence._pipeline.validator import PipelineValidationError
 
 
 def test_build_uses_smart_defaults_for_file():
-    """PipelineBuilder().build() (default input_type='file') should produce a config with document_intelligence, extraction, ontology."""
+    """Default build() should produce doc_intel, extraction, ontology."""
     config = PipelineBuilder().build()
     services = [s.service for s in config.services]
     assert "document_intelligence" in services
@@ -22,7 +20,7 @@ def test_build_uses_smart_defaults_for_file():
 
 
 def test_build_does_not_inject_doc_intel_for_text():
-    """PipelineBuilder().extraction().build(input_type='text') should NOT have document_intelligence in services."""
+    """Text input should NOT inject document_intelligence."""
     config = PipelineBuilder().extraction().build(input_type="text")
     services = [s.service for s in config.services]
     assert "document_intelligence" not in services
@@ -30,7 +28,7 @@ def test_build_does_not_inject_doc_intel_for_text():
 
 
 def test_build_auto_injects_extraction_for_ontology():
-    """PipelineBuilder().ontology().build() should auto-inject both document_intelligence and extraction."""
+    """Ontology should auto-inject doc_intel and extraction."""
     config = PipelineBuilder().ontology().build()
     services = [s.service for s in config.services]
     assert "document_intelligence" in services
@@ -44,7 +42,7 @@ def test_build_auto_injects_extraction_for_ontology():
 
 
 def test_build_strict_mode_raises_for_invalid():
-    """PipelineBuilder().extraction().strict().build() should raise PipelineValidationError because extraction requires doc_intel parent with file input."""
+    """Strict mode should raise when extraction lacks doc_intel parent."""
     with pytest.raises(PipelineValidationError):
         PipelineBuilder().extraction().strict().build()
 

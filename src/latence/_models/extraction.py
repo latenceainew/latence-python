@@ -15,9 +15,7 @@ class ExtractionConfig(BaseModel):
     label_mode: Literal["user", "hybrid", "generated"] = Field(
         default="generated", description="Label generation mode"
     )
-    user_labels: list[str] | None = Field(
-        default=None, description="User-provided entity labels"
-    )
+    user_labels: list[str] | None = Field(default=None, description="User-provided entity labels")
     threshold: float = Field(default=0.3, description="Confidence threshold")
     chunk_size: int = Field(default=1024, description="Chunk size in tokens")
     enable_refinement: bool = Field(default=False, description="Enable LLM refinement")
@@ -35,5 +33,7 @@ class ExtractResponse(BaseResponse):
     entity_count: int = Field(default=0, description="Number of entities found")
     unique_labels: list[str] = Field(default_factory=list, description="Unique labels found")
     chunks_processed: int = Field(default=1, description="Number of chunks processed")
-    labels_generated: bool | list[str] = Field(default=False, description="Auto-generated labels (True/list of label names)")
+    labels_generated: bool | list[str] = Field(
+        default=False, description="Auto-generated labels (True/list of label names)"
+    )
     usage: Usage | None = Field(default=None, description="Credit usage")

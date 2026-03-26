@@ -20,55 +20,32 @@ from __future__ import annotations
 import json
 import warnings
 import zipfile
-from io import BytesIO
 from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
 from latence._base import APIResponse, ResponseMetadata
-from latence._models.common import Entity
 from latence._models.pipeline import (
-    FileInput,
-    PipelineConfig,
     PipelineExecutionSummary,
-    PipelineInput,
     PipelineResultResponse,
-    PipelineSubmitResponse,
     PipelineStatusResponse,
-    ServiceConfig,
+    PipelineSubmitResponse,
     StageResult,
     StageStatus,
 )
+from latence._pipeline.builder import PipelineBuilder
 from latence._pipeline.data_package import (
-    ConfidenceScores,
     DataPackage,
-    DocumentMetadataInfo,
-    DocumentSection,
-    EntitiesSection,
-    EntitySummary,
-    KnowledgeGraphSection,
-    QualityReport,
-    RedactionSection,
-    RedactionSummary,
-    StageReport,
 )
 from latence._pipeline.job import AsyncJob, Job
 from latence._pipeline.spec import (
-    DEFAULT_INTELLIGENCE_PIPELINE,
-    PLACEHOLDER_STEPS,
-    STEP_ALIASES,
-    STEP_ORDER,
     build_pipeline_config,
     has_file_input,
     parse_input,
     parse_steps_config,
     resolve_step_name,
 )
-from latence._pipeline.builder import PipelineBuilder
-from latence._deprecation import DeprecatedServiceProperty
-
 
 # =============================================================================
 # Fake client for unit testing (no live API calls)
@@ -155,10 +132,28 @@ def _make_pipeline_result(
             status="completed",
             output={
                 "entities": [
-                    {"start": 0, "end": 8, "text": "Party A", "label": "ORGANIZATION", "score": 0.95},
-                    {"start": 13, "end": 20, "text": "Party B", "label": "ORGANIZATION", "score": 0.91},
+                    {
+                        "start": 0,
+                        "end": 8,
+                        "text": "Party A",
+                        "label": "ORGANIZATION",
+                        "score": 0.95,
+                    },
+                    {
+                        "start": 13,
+                        "end": 20,
+                        "text": "Party B",
+                        "label": "ORGANIZATION",
+                        "score": 0.91,
+                    },
                     {"start": 25, "end": 35, "text": "2026-01-01", "label": "DATE", "score": 0.88},
-                    {"start": 40, "end": 50, "text": "John Smith", "label": "PERSON", "score": 0.93},
+                    {
+                        "start": 40,
+                        "end": 50,
+                        "text": "John Smith",
+                        "label": "PERSON",
+                        "score": 0.93,
+                    },
                     {"start": 55, "end": 65, "text": "Jane Doe", "label": "PERSON", "score": 0.90},
                 ],
             },
@@ -172,20 +167,58 @@ def _make_pipeline_result(
             status="completed",
             output={
                 "entities": [
-                    {"start": 0, "end": 8, "text": "Party A", "label": "ORGANIZATION", "score": 0.95},
-                    {"start": 13, "end": 20, "text": "Party B", "label": "ORGANIZATION", "score": 0.91},
-                    {"start": 40, "end": 50, "text": "John Smith", "label": "PERSON", "score": 0.93},
+                    {
+                        "start": 0,
+                        "end": 8,
+                        "text": "Party A",
+                        "label": "ORGANIZATION",
+                        "score": 0.95,
+                    },
+                    {
+                        "start": 13,
+                        "end": 20,
+                        "text": "Party B",
+                        "label": "ORGANIZATION",
+                        "score": 0.91,
+                    },
+                    {
+                        "start": 40,
+                        "end": 50,
+                        "text": "John Smith",
+                        "label": "PERSON",
+                        "score": 0.93,
+                    },
                 ],
                 "relations": [
                     {
-                        "entity1": {"text": "John Smith", "label": "PERSON", "start": 40, "end": 50},
-                        "entity2": {"text": "Party A", "label": "ORGANIZATION", "start": 0, "end": 8},
+                        "entity1": {
+                            "text": "John Smith",
+                            "label": "PERSON",
+                            "start": 40,
+                            "end": 50,
+                        },
+                        "entity2": {
+                            "text": "Party A",
+                            "label": "ORGANIZATION",
+                            "start": 0,
+                            "end": 8,
+                        },
                         "score": 0.85,
                         "relation_label": "WORKS_FOR",
                     },
                     {
-                        "entity1": {"text": "Party A", "label": "ORGANIZATION", "start": 0, "end": 8},
-                        "entity2": {"text": "Party B", "label": "ORGANIZATION", "start": 13, "end": 20},
+                        "entity1": {
+                            "text": "Party A",
+                            "label": "ORGANIZATION",
+                            "start": 0,
+                            "end": 8,
+                        },
+                        "entity2": {
+                            "text": "Party B",
+                            "label": "ORGANIZATION",
+                            "start": 13,
+                            "end": 20,
+                        },
                         "score": 0.78,
                         "relation_label": "CONTRACTS_WITH",
                     },
@@ -205,7 +238,13 @@ def _make_pipeline_result(
             output={
                 "redacted_text": "# Contract\n\nThis is a test contract between [ORG] and [ORG].",
                 "entities": [
-                    {"start": 40, "end": 50, "text": "John Smith", "label": "PERSON", "score": 0.93},
+                    {
+                        "start": 40,
+                        "end": 50,
+                        "text": "John Smith",
+                        "label": "PERSON",
+                        "score": 0.93,
+                    },
                     {"start": 55, "end": 65, "text": "Jane Doe", "label": "PERSON", "score": 0.90},
                 ],
                 "entity_count": 2,
@@ -298,9 +337,7 @@ class TestDataPackageComposition:
 
     def test_composition_doc_only(self):
         """Pipeline with only doc_intel should compose document section only."""
-        result = _make_pipeline_result(
-            include_extraction=False, include_ontology=False
-        )
+        result = _make_pipeline_result(include_extraction=False, include_ontology=False)
         pkg = DataPackage.from_pipeline_result(result)
 
         assert pkg.document is not None
@@ -315,9 +352,7 @@ class TestDataPackageComposition:
             status="COMPLETED",
             final_output=None,
             intermediate_results={},
-            execution_summary=PipelineExecutionSummary(
-                total_stages=0, completed_stages=0
-            ),
+            execution_summary=PipelineExecutionSummary(total_stages=0, completed_stages=0),
         )
         pkg = DataPackage.from_pipeline_result(result)
 
@@ -372,9 +407,7 @@ class TestDataPackageArchive:
 
     def test_archive_without_optional_sections(self, tmp_path: Path):
         """Archive should handle missing sections gracefully."""
-        result = _make_pipeline_result(
-            include_extraction=False, include_ontology=False
-        )
+        result = _make_pipeline_result(include_extraction=False, include_ontology=False)
         pkg = DataPackage.from_pipeline_result(result)
 
         archive_path = tmp_path / "minimal.zip"
@@ -516,9 +549,7 @@ class TestSmartDefaults:
 
     def test_explicit_steps_override_defaults(self):
         """Explicit steps should override smart defaults."""
-        config = build_pipeline_config(
-            steps={"ocr": {}, "extraction": {}}, has_files=True
-        )
+        config = build_pipeline_config(steps={"ocr": {}, "extraction": {}}, has_files=True)
         service_names = [s.service for s in config.services]
         assert service_names == ["document_intelligence", "extraction"]
         assert "ontology" not in service_names
@@ -530,9 +561,7 @@ class TestSmartDefaults:
 
     def test_name_passed_through(self):
         """Pipeline name should be set in config."""
-        config = build_pipeline_config(
-            steps=None, has_files=True, name="My Pipeline"
-        )
+        config = build_pipeline_config(steps=None, has_files=True, name="My Pipeline")
         assert config.name == "My Pipeline"
 
 
@@ -746,12 +775,7 @@ class TestPipelineSubmit:
 
         pipeline = Pipeline(fake_client)
 
-        config = (
-            PipelineBuilder()
-            .doc_intel(mode="performance")
-            .extraction(threshold=0.3)
-            .build()
-        )
+        config = PipelineBuilder().doc_intel(mode="performance").extraction(threshold=0.3).build()
 
         job = pipeline.submit(
             config,
@@ -828,9 +852,7 @@ class TestDeprecationWarnings:
 
             dep_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
             # Only one warning for extraction (not two)
-            extraction_warnings = [
-                x for x in dep_warnings if "extraction" in str(x.message)
-            ]
+            extraction_warnings = [x for x in dep_warnings if "extraction" in str(x.message)]
             assert len(extraction_warnings) == 1
 
     def test_pipeline_not_deprecated(self):

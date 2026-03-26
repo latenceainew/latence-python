@@ -3,19 +3,17 @@
 import pytest
 
 from latence._models.chunking import (
-    ChunkData,
     ChunkItem,
     ChunkResponse,
 )
 from latence._pipeline.builder import PipelineBuilder
+from latence._pipeline.data_package import ChunkingSection, ChunkingSummary
 from latence._pipeline.spec import (
     PLACEHOLDER_STEPS,
     STEP_ALIASES,
     STEP_ORDER,
     resolve_step_name,
 )
-from latence._pipeline.data_package import ChunkingSection, ChunkingSummary
-
 
 # =============================================================================
 # MODEL TESTS
@@ -87,8 +85,13 @@ class TestChunkModels:
             "success": True,
             "data": {
                 "chunks": [
-                    {"content": f"Chunk {i}", "index": i, "start": i * 100,
-                     "end": (i + 1) * 100, "char_count": 100}
+                    {
+                        "content": f"Chunk {i}",
+                        "index": i,
+                        "start": i * 100,
+                        "end": (i + 1) * 100,
+                        "char_count": 100,
+                    }
                     for i in range(5)
                 ],
                 "num_chunks": 5,

@@ -3,29 +3,25 @@
 import pytest
 
 from latence._models.pipeline import (
+    FileInput,
     PipelineConfig,
     PipelineInput,
-    PipelineValidationResult,
     ServiceConfig,
-    FileInput,
 )
 from latence._pipeline.builder import PipelineBuilder
 from latence._pipeline.spec import (
     SERVICE_PARENT,
     STEP_ORDER,
-    STEP_ALIASES,
-    PLACEHOLDER_STEPS,
-    resolve_step_name,
-    parse_steps_config,
     _topological_sort,
+    parse_steps_config,
+    resolve_step_name,
 )
 from latence._pipeline.validator import (
-    PipelineValidationError,
-    validate_pipeline,
-    _detect_input_type,
     SERVICE_IO,
+    PipelineValidationError,
+    _detect_input_type,
+    validate_pipeline,
 )
-
 
 # =============================================================================
 # SPEC / DAG TESTS
@@ -98,8 +94,16 @@ class TestStepAliases:
 
     def test_canonical_names_resolve_to_self(self):
         """Canonical names should resolve to themselves."""
-        for canonical in ["document_intelligence", "extraction", "ontology",
-                          "redaction", "compression", "embedding", "colbert", "colpali"]:
+        for canonical in [
+            "document_intelligence",
+            "extraction",
+            "ontology",
+            "redaction",
+            "compression",
+            "embedding",
+            "colbert",
+            "colpali",
+        ]:
             assert resolve_step_name(canonical) == canonical
 
     def test_friendly_aliases(self):
@@ -139,11 +143,13 @@ class TestParseStepsConfig:
 
     def test_sorts_by_dag(self):
         """Steps should be topologically sorted by DAG."""
-        configs = parse_steps_config({
-            "ontology": {"resolve_entities": True},
-            "extraction": {},
-            "document_intelligence": {"mode": "performance"},
-        })
+        configs = parse_steps_config(
+            {
+                "ontology": {"resolve_entities": True},
+                "extraction": {},
+                "document_intelligence": {"mode": "performance"},
+            }
+        )
         names = [c.service for c in configs]
         assert names.index("document_intelligence") < names.index("extraction")
         assert names.index("extraction") < names.index("ontology")
@@ -157,11 +163,13 @@ class TestParseStepsConfig:
 
     def test_siblings_both_present(self):
         """Sibling services both appear."""
-        configs = parse_steps_config({
-            "document_intelligence": {},
-            "redaction": {"mode": "strict"},
-            "extraction": {},
-        })
+        configs = parse_steps_config(
+            {
+                "document_intelligence": {},
+                "redaction": {"mode": "strict"},
+                "extraction": {},
+            }
+        )
         names = [c.service for c in configs]
         assert "redaction" in names
         assert "extraction" in names
@@ -188,7 +196,10 @@ class TestInputTypeDetection:
     def test_detect_entities_input(self):
         """Should detect entities input type."""
         from latence._models.common import Entity
-        input_data = PipelineInput(entities=[Entity(start=0, end=5, text="hello", label="test", score=0.9)])
+
+        input_data = PipelineInput(
+            entities=[Entity(start=0, end=5, text="hello", label="test", score=0.9)]
+        )
         assert _detect_input_type(input_data) == "entities"
 
     def test_detect_unknown_input(self):
@@ -404,20 +415,14 @@ class TestPipelineBuilder:
 
     def test_redaction_always_enforces_refinement(self):
         """Redaction builder must always set enforce_refinement=True."""
-        config = (
-            PipelineBuilder()
-            .redaction(mode="balanced")
-            .build()
-        )
+        config = PipelineBuilder().redaction(mode="balanced").build()
         red = [s for s in config.services if s.service == "redaction"][0]
         assert red.config["enforce_refinement"] is True
 
     def test_compression_config(self):
         """Compression should accept proper configuration."""
         config = (
-            PipelineBuilder()
-            .compression(compression_rate=0.7, force_tokens=["important"])
-            .build()
+            PipelineBuilder().compression(compression_rate=0.7, force_tokens=["important"]).build()
         )
         comp = [s for s in config.services if s.service == "compression"][0]
         assert comp.config["compression_rate"] == 0.7
@@ -525,11 +530,7 @@ class TestPipelineBuilderValidation:
 
     def test_auto_fix_incomplete_pipeline(self):
         """Incomplete pipeline should be auto-fixed via DAG by build()."""
-        config = (
-            PipelineBuilder()
-            .ontology()
-            .build()
-        )
+        config = PipelineBuilder().ontology().build()
 
         services = [s.service for s in config.services]
         assert "extraction" in services
@@ -612,7 +613,13 @@ class TestPipelineResumeModels:
             "is_resumable": True,
             "resume_count": 1,
             "failed_stage": "extraction",
-            "pipeline_report": {"stages": [], "dataset": {}, "cost": {}, "timing": {}, "resume_count": 1},
+            "pipeline_report": {
+                "stages": [],
+                "dataset": {},
+                "cost": {},
+                "timing": {},
+                "resume_count": 1,
+            },
         }
         resp = PipelineStatusResponse.model_validate(data)
         assert resp.status == "RESUMABLE"
@@ -648,11 +655,13 @@ class TestDataPackage:
 
     def test_quality_report_fields(self):
         """QualityReport should have the documented fields."""
-        from latence._pipeline.data_package import QualityReport, StageReport, ConfidenceScores
+        from latence._pipeline.data_package import ConfidenceScores, QualityReport, StageReport
 
         report = QualityReport(
             stages=[
-                StageReport(service="document_intelligence", status="completed", processing_time_ms=1500.0),
+                StageReport(
+                    service="document_intelligence", status="completed", processing_time_ms=1500.0
+                ),
                 StageReport(service="extraction", status="completed", processing_time_ms=800.0),
             ],
             confidence=ConfidenceScores(entity_avg_confidence=0.87),
@@ -678,15 +687,17 @@ class TestDataPackage:
         """EnrichmentSection.features should be a dict, not a list."""
         from latence._pipeline.data_package import EnrichmentSection
 
-        section = EnrichmentSection(
-            features={"quality": {"score": 0.9}, "density": {"score": 0.7}}
-        )
+        section = EnrichmentSection(features={"quality": {"score": 0.9}, "density": {"score": 0.7}})
         assert isinstance(section.features, dict)
         assert "quality" in section.features
 
     def test_data_package_merge_structure(self):
         """merge() output should match documented structure."""
-        from latence._pipeline.data_package import DataPackage, DocumentSection, DocumentMetadataInfo
+        from latence._pipeline.data_package import (
+            DataPackage,
+            DocumentMetadataInfo,
+            DocumentSection,
+        )
 
         pkg = DataPackage(
             id="pipe_test",
@@ -712,7 +723,12 @@ class TestDataPackage:
     def test_download_archive_structure(self, tmp_path):
         """Archive should contain quality_report.json and metadata.json."""
         import zipfile
-        from latence._pipeline.data_package import DataPackage, DocumentSection, DocumentMetadataInfo
+
+        from latence._pipeline.data_package import (
+            DataPackage,
+            DocumentMetadataInfo,
+            DocumentSection,
+        )
 
         pkg = DataPackage(
             id="pipe_test",
@@ -744,23 +760,43 @@ class TestErrorHierarchy:
 
     def test_all_errors_inherit_from_latence_error(self):
         from latence import (
-            LatenceError, APIError, AuthenticationError,
-            InsufficientCreditsError, NotFoundError, ValidationError,
-            RateLimitError, ServerError, APIConnectionError,
-            APITimeoutError, JobError, JobTimeoutError,
+            APIConnectionError,
+            APIError,
+            APITimeoutError,
+            AuthenticationError,
+            InsufficientCreditsError,
+            JobError,
+            JobTimeoutError,
+            LatenceError,
+            NotFoundError,
+            RateLimitError,
+            ServerError,
+            ValidationError,
         )
-        for cls in [APIError, AuthenticationError, InsufficientCreditsError,
-                     NotFoundError, ValidationError, RateLimitError,
-                     ServerError, APIConnectionError, APITimeoutError,
-                     JobError, JobTimeoutError]:
+
+        for cls in [
+            APIError,
+            AuthenticationError,
+            InsufficientCreditsError,
+            NotFoundError,
+            ValidationError,
+            RateLimitError,
+            ServerError,
+            APIConnectionError,
+            APITimeoutError,
+            JobError,
+            JobTimeoutError,
+        ]:
             assert issubclass(cls, LatenceError)
 
     def test_job_timeout_is_job_error(self):
         from latence import JobError, JobTimeoutError
+
         assert issubclass(JobTimeoutError, JobError)
 
     def test_service_config_public_import(self):
         """ServiceConfig should be importable from latence directly."""
         from latence import ServiceConfig
+
         sc = ServiceConfig(service="extraction", config={"threshold": 0.3})
         assert sc.service == "extraction"

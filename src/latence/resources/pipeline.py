@@ -20,21 +20,22 @@ from typing import TYPE_CHECKING, Any, BinaryIO, Callable
 
 import httpx
 
-from .._constants import B2_PIPELINE_FETCH_TIMEOUT, B2_UPLOAD_TIMEOUT, DEFAULT_POLL_INTERVAL, DEFAULT_POLL_TIMEOUT, PRESIGNED_UPLOAD_THRESHOLD
-from .._exceptions import APIError, JobError, JobTimeoutError, LatenceError
+from .._constants import (
+    B2_PIPELINE_FETCH_TIMEOUT,
+    B2_UPLOAD_TIMEOUT,
+    PRESIGNED_UPLOAD_THRESHOLD,
+)
+from .._exceptions import APIError, JobError, JobTimeoutError
 from .._models.jobs import JobCancelResponse
 from .._models.pipeline import (
     FileInput,
     PipelineConfig,
-    PipelineExecutionSummary,
     PipelineInput,
-    PipelineReport,
     PipelineResultResponse,
     PipelineStatusResponse,
     PipelineSubmitResponse,
     PipelineValidationResult,
     StageDownload,
-    StageResult,
 )
 from .._pipeline.builder import PipelineBuilder
 from .._pipeline.job import AsyncJob, Job
@@ -200,8 +201,7 @@ def _parse_pipeline_zip(raw: bytes) -> dict[str, Any]:
     # Attach raw per-document data and manifest for merge() utility
     result["_zip_manifest"] = manifest
     result["_zip_documents"] = {
-        svc: [d.get("output", d) for d in docs]
-        for svc, docs in per_doc.items()
+        svc: [d.get("output", d) for d in docs] for svc, docs in per_doc.items()
     }
 
     return result
@@ -307,9 +307,7 @@ class Pipeline(SyncResource):
         config = build_pipeline_config(steps=steps, name=name, has_files=is_files)
 
         # Build input
-        pipeline_input = parse_input(
-            files=files, file_urls=file_urls, text=text, entities=entities
-        )
+        pipeline_input = parse_input(files=files, file_urls=file_urls, text=text, entities=entities)
         if pipeline_input is None:
             raise ValueError(
                 "At least one input must be provided: files, file_urls, text, or entities"
@@ -404,23 +402,23 @@ class Pipeline(SyncResource):
     ) -> PipelineValidationResult:
         """
         Validate a pipeline configuration without executing it.
-        
+
         Args:
             pipeline: PipelineConfig or PipelineBuilder to validate
             files: Local files to process (optional, for validation context)
             file_urls: URLs of files to process (optional, for validation context)
             text: Text input (optional, for validation context)
             entities: Pre-extracted entities (optional, for validation context)
-        
+
         Returns:
             PipelineValidationResult with validation details
-        
+
         Raises:
             PipelineValidationError: If strict_mode=True and validation fails
         """
         # Convert builder to config if needed
         config = pipeline.build() if isinstance(pipeline, PipelineBuilder) else pipeline
-        
+
         # Build pipeline input for validation context
         pipeline_input = self._build_pipeline_input(
             files=files,
@@ -428,7 +426,7 @@ class Pipeline(SyncResource):
             text=text,
             entities=entities,
         )
-        
+
         return validate_pipeline(config, pipeline_input)
 
     def execute(
@@ -444,10 +442,10 @@ class Pipeline(SyncResource):
     ) -> PipelineSubmitResponse:
         """
         Submit a pipeline for async execution.
-        
+
         Pipelines are always executed asynchronously. Use `wait()` or `status()`
         to poll for completion.
-        
+
         Args:
             pipeline: PipelineConfig or PipelineBuilder to execute
             files: Local files to process (converted to base64)
@@ -455,17 +453,17 @@ class Pipeline(SyncResource):
             text: Text input
             entities: Pre-extracted entities (for ontology-only pipelines)
             request_id: Optional tracking ID
-        
+
         Returns:
             PipelineSubmitResponse with job_id for polling
-        
+
         Raises:
             PipelineValidationError: If strict_mode=True and validation fails
             ValueError: If no input is provided
         """
         # Convert builder to config if needed
         config = pipeline.build() if isinstance(pipeline, PipelineBuilder) else pipeline
-        
+
         # Build pipeline input (or use override from run())
         if _pipeline_input_override is not None:
             pipeline_input = _pipeline_input_override
@@ -476,28 +474,27 @@ class Pipeline(SyncResource):
                 text=text,
                 entities=entities,
             )
-        
+
         if pipeline_input is None:
             raise ValueError(
                 "At least one input must be provided: files, file_urls, text, or entities"
             )
-        
+
         # Validate pipeline (may auto-inject services or raise error)
         validation = validate_pipeline(config, pipeline_input)
-        
+
         if not validation.valid and config.strict_mode:
             raise PipelineValidationError(
                 message="Pipeline validation failed",
                 errors=validation.errors,
                 suggestion="Fix validation errors or disable strict_mode",
             )
-        
+
         # Build request body -- map configs by service name, not index
         svc_configs = {sc.service: sc.config for sc in config.services}
         body: dict[str, Any] = {
             "services": [
-                {"service": s, "config": svc_configs.get(s, {})}
-                for s in validation.services
+                {"service": s, "config": svc_configs.get(s, {})} for s in validation.services
             ],
             "store_intermediate": config.store_intermediate,
             "input": pipeline_input.model_dump(exclude_none=True),
@@ -521,10 +518,10 @@ class Pipeline(SyncResource):
     def status(self, job_id: str) -> PipelineStatusResponse:
         """
         Get status of a pipeline job.
-        
+
         Args:
             job_id: Pipeline job identifier
-        
+
         Returns:
             PipelineStatusResponse with current status
         """
@@ -572,7 +569,10 @@ class Pipeline(SyncResource):
                     consecutive_errors += 1
                     _log.warning(
                         "Transient error polling pipeline %s (attempt %d/%d): %s",
-                        job_id, consecutive_errors, _MAX_TRANSIENT_RETRIES, exc,
+                        job_id,
+                        consecutive_errors,
+                        _MAX_TRANSIENT_RETRIES,
+                        exc,
                     )
                     time.sleep(poll_interval)
                     continue
@@ -620,16 +620,16 @@ class Pipeline(SyncResource):
 
         Args:
             job_id: Pipeline job identifier
-        
+
         Returns:
             PipelineResultResponse with results
-        
+
         Raises:
             JobError: If pipeline failed or results unavailable
         """
         response = self._client.get(f"/api/v1/pipeline/{job_id}/result")
         data = response.data
-        
+
         # If result is in B2, fetch it (handles both ZIP and JSON)
         _zip_meta: dict[str, Any] = {}
         if data.get("output_url"):
@@ -639,7 +639,7 @@ class Pipeline(SyncResource):
             if "_zip_manifest" in output_data:
                 _zip_meta["_zip_manifest"] = output_data["_zip_manifest"]
                 _zip_meta["_zip_documents"] = output_data.get("_zip_documents", {})
-        
+
         result = PipelineResultResponse.model_validate(data)
         # Attach raw ZIP data for downstream merge() usage
         if _zip_meta:
@@ -716,7 +716,9 @@ class Pipeline(SyncResource):
             for f in files:
                 if isinstance(f, (str, Path)):
                     resolved = Path(f)
-                    local_files.append((f, os.path.getsize(resolved) if resolved.is_file() else None))
+                    local_files.append(
+                        (f, os.path.getsize(resolved) if resolved.is_file() else None)
+                    )
                 else:
                     local_files.append((f, None))
 
@@ -763,10 +765,12 @@ class Pipeline(SyncResource):
                 name = getattr(f, "name", "upload")
                 if hasattr(f, "name"):
                     name = Path(f.name).name
-            file_meta.append({
-                "filename": name,
-                "content_type": _guess_content_type(name),
-            })
+            file_meta.append(
+                {
+                    "filename": name,
+                    "content_type": _guess_content_type(name),
+                }
+            )
 
         resp = self._client.post(
             "/api/v1/pipeline/presign",
@@ -848,9 +852,7 @@ class AsyncPipeline(AsyncResource):
         is_files = has_file_input(files=files, file_urls=file_urls)
         config = build_pipeline_config(steps=steps, name=name, has_files=is_files)
 
-        pipeline_input = parse_input(
-            files=files, file_urls=file_urls, text=text, entities=entities
-        )
+        pipeline_input = parse_input(files=files, file_urls=file_urls, text=text, entities=entities)
         if pipeline_input is None:
             raise ValueError(
                 "At least one input must be provided: files, file_urls, text, or entities"
@@ -980,7 +982,7 @@ class AsyncPipeline(AsyncResource):
             ValueError: If no input is provided
         """
         config = pipeline.build() if isinstance(pipeline, PipelineBuilder) else pipeline
-        
+
         pending_files: list[tuple[str | Path | BinaryIO, int | None]] | None = None
 
         if _pipeline_input_override is not None:
@@ -1014,8 +1016,7 @@ class AsyncPipeline(AsyncResource):
         svc_configs = {sc.service: sc.config for sc in config.services}
         body: dict[str, Any] = {
             "services": [
-                {"service": s, "config": svc_configs.get(s, {})}
-                for s in validation.services
+                {"service": s, "config": svc_configs.get(s, {})} for s in validation.services
             ],
             "store_intermediate": config.store_intermediate,
             "input": pipeline_input.model_dump(exclude_none=True),
@@ -1090,7 +1091,10 @@ class AsyncPipeline(AsyncResource):
                     consecutive_errors += 1
                     _log.warning(
                         "Transient error polling pipeline %s (attempt %d/%d): %s",
-                        job_id, consecutive_errors, _MAX_TRANSIENT_RETRIES, exc,
+                        job_id,
+                        consecutive_errors,
+                        _MAX_TRANSIENT_RETRIES,
+                        exc,
                     )
                     await asyncio.sleep(poll_interval)
                     continue
@@ -1147,7 +1151,7 @@ class AsyncPipeline(AsyncResource):
         """
         response = await self._client.get(f"/api/v1/pipeline/{job_id}/result")
         data = response.data
-        
+
         _zip_meta: dict[str, Any] = {}
         if data.get("output_url"):
             output_data = await self._fetch_output_url(data["output_url"])
@@ -1156,7 +1160,7 @@ class AsyncPipeline(AsyncResource):
             if "_zip_manifest" in output_data:
                 _zip_meta["_zip_manifest"] = output_data["_zip_manifest"]
                 _zip_meta["_zip_documents"] = output_data.get("_zip_documents", {})
-        
+
         result = PipelineResultResponse.model_validate(data)
         if _zip_meta:
             result._zip_manifest = _zip_meta.get("_zip_manifest", {})  # type: ignore[attr-defined]
@@ -1231,7 +1235,9 @@ class AsyncPipeline(AsyncResource):
             for f in files:
                 if isinstance(f, (str, Path)):
                     resolved = Path(f)
-                    local_files.append((f, os.path.getsize(resolved) if resolved.is_file() else None))
+                    local_files.append(
+                        (f, os.path.getsize(resolved) if resolved.is_file() else None)
+                    )
                 else:
                     local_files.append((f, None))
 
@@ -1276,10 +1282,12 @@ class AsyncPipeline(AsyncResource):
                 name = getattr(f, "name", "upload")
                 if hasattr(f, "name"):
                     name = Path(f.name).name
-            file_meta.append({
-                "filename": name,
-                "content_type": _guess_content_type(name),
-            })
+            file_meta.append(
+                {
+                    "filename": name,
+                    "content_type": _guess_content_type(name),
+                }
+            )
 
         resp = await self._client.post(
             "/api/v1/pipeline/presign",
@@ -1300,7 +1308,9 @@ class AsyncPipeline(AsyncResource):
             async with sem:
                 async with httpx.AsyncClient(timeout=httpx.Timeout(B2_UPLOAD_TIMEOUT)) as client:
                     put_resp = await client.put(
-                        upload_url, content=data, headers={"Content-Type": ct},
+                        upload_url,
+                        content=data,
+                        headers={"Content-Type": ct},
                     )
                     put_resp.raise_for_status()
             del data

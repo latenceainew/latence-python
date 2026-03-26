@@ -12,18 +12,23 @@ if TYPE_CHECKING:
 
 
 class Ontology(SyncResource):
-    """
-    Relation Extraction service - extract relations and build knowledge graphs from text and entities.
+    """Relation Extraction service.
 
-    Example:
-        >>> result = client.ontology.build_graph(
-        ...     text="Microsoft is headquartered in Redmond.",
-        ...     entities=[
-        ...         {"text": "Microsoft", "label": "ORG", "start": 0, "end": 9, "score": 0.98, "index": 0},
-        ...         {"text": "Redmond", "label": "GPE", "start": 29, "end": 36, "score": 0.95, "index": 1}
-        ...     ]
-        ... )
-        >>> print(result.relations)
+    Extract relations and build knowledge graphs from text
+    and entities.
+
+    Example::
+
+        result = client.ontology.build_graph(
+            text="Microsoft is headquartered in Redmond.",
+            entities=[
+                {"text": "Microsoft", "label": "ORG",
+                 "start": 0, "end": 9, "score": 0.98},
+                {"text": "Redmond", "label": "GPE",
+                 "start": 29, "end": 36, "score": 0.95},
+            ],
+        )
+        print(result.relations)
     """
 
     def __init__(self, client: BaseSyncClient) -> None:

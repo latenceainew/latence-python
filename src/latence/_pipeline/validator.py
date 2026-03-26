@@ -18,10 +18,8 @@ from .._models.pipeline import (
     PipelineConfig,
     PipelineInput,
     PipelineValidationResult,
-    ServiceConfig,
 )
 from .spec import SERVICE_PARENT
-
 
 # Input/output type definitions for each service (mirrors worker config.SERVICE_IO)
 SERVICE_IO: dict[str, dict[str, list[str] | str]] = {
@@ -84,18 +82,20 @@ class PipelineValidationError(LatenceError):
         super().__init__(message)
 
 
-def _detect_input_type(pipeline_input: PipelineInput | None) -> Literal["file", "text", "entities", "unknown"]:
+def _detect_input_type(
+    pipeline_input: PipelineInput | None,
+) -> Literal["file", "text", "entities", "unknown"]:
     """Detect the primary input type from pipeline input."""
     if pipeline_input is None:
         return "unknown"
-    
+
     if pipeline_input.files and len(pipeline_input.files) > 0:
         return "file"
     elif pipeline_input.text:
         return "text"
     elif pipeline_input.entities and len(pipeline_input.entities) > 0:
         return "entities"
-    
+
     return "unknown"
 
 
@@ -110,14 +110,17 @@ def _check_first_service_compatibility(
 ) -> tuple[bool, str | None]:
     """Check if the first service is compatible with the input type."""
     service_inputs = SERVICE_IO.get(first_service, {}).get("input", [])
-    
+
     # Map input_type to service input types
     if input_type == "file":
         # Files need document_intelligence or colpali
         if "file" in service_inputs or "image" in service_inputs:
             return True, None
-        return False, f"Input is file/image but first service '{first_service}' requires {service_inputs}"
-    
+        return (
+            False,
+            f"Input is file/image but first service '{first_service}' requires {service_inputs}",
+        )
+
     elif input_type == "text":
         if "text" in service_inputs:
             return True, None
@@ -125,12 +128,15 @@ def _check_first_service_compatibility(
         if first_service == "colpali" and "text" in service_inputs:
             return True, None
         return False, f"Input is text but first service '{first_service}' requires {service_inputs}"
-    
+
     elif input_type == "entities":
         if "entities" in service_inputs:
             return True, None
-        return False, f"Input is entities but first service '{first_service}' requires {service_inputs}"
-    
+        return (
+            False,
+            f"Input is entities but first service '{first_service}' requires {service_inputs}",
+        )
+
     return True, None  # Unknown input type - let it through
 
 
@@ -156,8 +162,7 @@ def _check_dag_dependencies(
                 continue
             missing.append(parent)
             errors.append(
-                f"Service '{service}' requires its parent '{parent}' "
-                f"to be in the pipeline"
+                f"Service '{service}' requires its parent '{parent}' to be in the pipeline"
             )
 
     return len(errors) == 0, list(set(missing)), errors
@@ -250,23 +255,23 @@ def validate_pipeline(
     pipeline_input: PipelineInput | None = None,
 ) -> PipelineValidationResult:
     """Validate a pipeline configuration.
-    
+
     Args:
         config: The pipeline configuration to validate
         pipeline_input: Optional input to validate against
-    
+
     Returns:
         PipelineValidationResult with validation details
-    
+
     Raises:
         PipelineValidationError: If strict_mode=True and validation fails
     """
     errors: list[str] = []
     warnings: list[str] = []
     auto_injected: list[str] = []
-    
+
     services = _get_service_list(config)
-    
+
     # Check for empty pipeline
     if not services:
         errors.append("Pipeline must contain at least one service")
@@ -283,22 +288,18 @@ def validate_pipeline(
             errors=errors,
             warnings=warnings,
         )
-    
+
     # Detect input type
     input_type = _detect_input_type(pipeline_input)
-    
+
     if input_type == "unknown" and pipeline_input is not None:
-        warnings.append(
-            "Could not determine input type - validation may be incomplete"
-        )
-    
+        warnings.append("Could not determine input type - validation may be incomplete")
+
     # If not strict mode, try to auto-inject missing services
     if not config.strict_mode:
         services, auto_injected = _auto_inject_services(input_type, services)
         if auto_injected:
-            warnings.append(
-                f"Auto-injected services: {auto_injected}"
-            )
+            warnings.append(f"Auto-injected services: {auto_injected}")
 
     # 1. Check first service compatibility with input
     if input_type != "unknown":
@@ -321,7 +322,7 @@ def validate_pipeline(
                 "ColPali with text input is typically used for queries. "
                 "For text embeddings, consider 'embedding' or 'colbert' instead."
             )
-    
+
     # Raise error in strict mode if validation failed
     if errors and config.strict_mode:
         suggestion = None
@@ -332,7 +333,7 @@ def validate_pipeline(
             errors=errors,
             suggestion=suggestion,
         )
-    
+
     return PipelineValidationResult(
         valid=len(errors) == 0,
         services=services,

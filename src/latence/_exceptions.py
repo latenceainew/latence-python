@@ -300,21 +300,15 @@ def _create_api_error(
 ) -> APIError:
     """Factory function to create the appropriate APIError subclass."""
     if status_code == 400:
-        return ValidationError(
-            message, error_code=error_code, request_id=request_id, body=body
-        )
+        return ValidationError(message, error_code=error_code, request_id=request_id, body=body)
     elif status_code == 401:
-        return AuthenticationError(
-            message, error_code=error_code, request_id=request_id, body=body
-        )
+        return AuthenticationError(message, error_code=error_code, request_id=request_id, body=body)
     elif status_code == 402:
         return InsufficientCreditsError(
             message, error_code=error_code, request_id=request_id, body=body
         )
     elif status_code == 404:
-        return NotFoundError(
-            message, error_code=error_code, request_id=request_id, body=body
-        )
+        return NotFoundError(message, error_code=error_code, request_id=request_id, body=body)
     elif status_code == 429:
         return RateLimitError(
             message,

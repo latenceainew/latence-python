@@ -75,9 +75,7 @@ class SyncResource:
         request_id: str | None = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        return _build_common_request_body(
-            return_job=return_job, request_id=request_id, **kwargs
-        )
+        return _build_common_request_body(return_job=return_job, request_id=request_id, **kwargs)
 
     def _presigned_upload(self, file_path: str | Path, filename: str) -> str:
         """Upload a large file via presigned URL, return the file_url for processing."""
@@ -118,9 +116,7 @@ class AsyncResource:
         request_id: str | None = None,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        return _build_common_request_body(
-            return_job=return_job, request_id=request_id, **kwargs
-        )
+        return _build_common_request_body(return_job=return_job, request_id=request_id, **kwargs)
 
     async def _presigned_upload(self, file_path: str | Path, filename: str) -> str:
         """Upload a large file via presigned URL, return the file_url for processing."""

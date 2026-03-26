@@ -63,7 +63,9 @@ class OntologyConfig(BaseModel):
     max_relations_per_decode: int = Field(default=30, description="Max relations per batch")
     resolve_entities: bool = Field(default=True, description="Merge duplicate entities")
     optimize_relations: bool = Field(default=True, description="Refine relation labels")
-    optimize_entity_resolution: bool = Field(default=False, description="Optimize entity resolution")
+    optimize_entity_resolution: bool = Field(
+        default=False, description="Optimize entity resolution"
+    )
     predict_missing_relations: bool = Field(default=False, description="Predict missing links")
     link_prediction_verify_with_ai: bool = Field(
         default=False, description="AI verification for predicted links"
@@ -89,7 +91,9 @@ class BuildGraphResponse(BaseResponse):
     """Response from knowledge graph construction."""
 
     entities: list[Entity] = Field(default_factory=list, description="Processed entities")
-    relations: list[OntologyRelation] = Field(default_factory=list, description="Extracted relations")
+    relations: list[OntologyRelation] = Field(
+        default_factory=list, description="Extracted relations"
+    )
     # knowledge_graph can be:
     # - KnowledgeGraph (dict with nodes/edges) for "custom" and "property_graph" formats
     # - str (Turtle syntax) for "rdf" format

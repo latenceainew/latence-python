@@ -2,21 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import mimetypes
 import struct
 from pathlib import Path
-from typing import BinaryIO, TypeVar, Callable, Awaitable, List, Union
-import asyncio
+from typing import Awaitable, BinaryIO, Callable, List, TypeVar, Union
 
 T = TypeVar("T")
 R = TypeVar("R")
 
 
 async def process_batch_concurrently(
-    items: List[T],
-    processor: Callable[[T], Awaitable[R]],
-    max_concurrency: int = 64
+    items: List[T], processor: Callable[[T], Awaitable[R]], max_concurrency: int = 64
 ) -> List[Union[R, Exception]]:
     """
     Process a batch of items concurrently with a semaphore limit.
@@ -158,7 +156,8 @@ def decode_base64_embeddings(
     expected_bytes = total_elements * size
     if len(raw_bytes) != expected_bytes:
         raise ValueError(
-            f"Size mismatch: expected {expected_bytes} bytes for shape {shape}, got {len(raw_bytes)}"
+            f"Size mismatch: expected {expected_bytes} bytes"
+            f" for shape {shape}, got {len(raw_bytes)}"
         )
 
     # Unpack all floats

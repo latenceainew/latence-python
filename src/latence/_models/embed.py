@@ -6,9 +6,8 @@ from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
-from .common import BaseResponse, Usage
 from .._utils import decode_base64_embeddings
-
+from .common import BaseResponse, Usage
 
 # Type alias for embedding types
 EmbedType = Literal["dense", "late_interaction", "image"]
@@ -66,9 +65,7 @@ class UnifiedEmbedResponse(BaseResponse):
     is_query: bool | None = Field(
         default=None, description="Whether this was a query (late_interaction, image)"
     )
-    tokens: int | None = Field(
-        default=None, description="Number of tokens (late_interaction only)"
-    )
+    tokens: int | None = Field(default=None, description="Number of tokens (late_interaction only)")
     patches: int | None = Field(default=None, description="Number of image patches (image only)")
     model: str = Field(description="Model used for embedding")
     usage: Usage | None = Field(default=None, description="Credit usage")
@@ -83,11 +80,7 @@ class UnifiedEmbedResponse(BaseResponse):
         shape = data.get("shape")
 
         # Handle list with single base64 string (unwrap it)
-        if (
-            isinstance(embeddings, list)
-            and len(embeddings) == 1
-            and isinstance(embeddings[0], str)
-        ):
+        if isinstance(embeddings, list) and len(embeddings) == 1 and isinstance(embeddings[0], str):
             embeddings = embeddings[0]
             data["embeddings"] = embeddings
 
@@ -113,7 +106,11 @@ class UnifiedEmbedResponse(BaseResponse):
 
         # Normalize flat array to nested: [0.1, 0.2, ...] → [[0.1, 0.2, ...]]
         embeddings = data.get("embeddings")
-        if isinstance(embeddings, list) and len(embeddings) > 0 and not isinstance(embeddings[0], list):
+        if (
+            isinstance(embeddings, list)
+            and len(embeddings) > 0
+            and not isinstance(embeddings[0], list)
+        ):
             data["embeddings"] = [embeddings]
 
         # Set default model based on type if missing

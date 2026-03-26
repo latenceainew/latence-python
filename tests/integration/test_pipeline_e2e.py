@@ -35,8 +35,6 @@ import httpx
 import pytest
 
 from latence import Latence, PipelineBuilder
-from latence._exceptions import JobError
-
 
 pytestmark = pytest.mark.skipif(
     not os.environ.get("LATENCE_API_KEY"),
@@ -99,6 +97,7 @@ def _query_org_balance(org_id: str) -> float | None:
 # =========================================================================
 # 2a. Pipeline Submission and Completion
 # =========================================================================
+
 
 class TestSmartDefaults:
     """Test pipeline with smart defaults (files only -> doc_intel + extraction + ontology)."""
@@ -194,13 +193,15 @@ class TestBuilderAPI:
 
 class TestTextOnlyExtraction:
     """Test text-only pipeline (no files, no doc_intel needed).
-    
+
     Note: The pipeline worker currently requires file-based input (files are
     uploaded to B2 and resolved from there). Text-only pipelines are supported
     by the API gateway's synchronous path, not the async pipeline worker.
     """
 
-    @pytest.mark.skip(reason="Pipeline worker requires file-based input; text-only uses sync API path")
+    @pytest.mark.skip(
+        reason="Pipeline worker requires file-based input; text-only uses sync API path"
+    )
     def test_text_extraction(self, client):
         job = client.pipeline.run(
             text=(
@@ -229,6 +230,7 @@ class TestTextOnlyExtraction:
 # 2b. DataPackage Deep Validation
 # =========================================================================
 
+
 class TestDataPackageDeepValidation:
     """Deep validation of DataPackage sections and metadata."""
 
@@ -255,8 +257,10 @@ class TestDataPackageDeepValidation:
         for e in pkg.entities.items:
             assert e.text, "Entity text should be non-empty"
             assert e.label, "Entity label should be non-empty"
-        assert pkg.entities.summary.total == len(pkg.entities.items), \
-            f"Summary total ({pkg.entities.summary.total}) != items count ({len(pkg.entities.items)})"
+        assert pkg.entities.summary.total == len(pkg.entities.items), (
+            f"Summary total ({pkg.entities.summary.total})"
+            f" != items count ({len(pkg.entities.items)})"
+        )
         assert len(pkg.entities.summary.unique_labels) > 0
 
         # Knowledge graph section
@@ -277,6 +281,7 @@ class TestDataPackageDeepValidation:
 # 2c. Archive Download Validation
 # =========================================================================
 
+
 class TestArchiveDownload:
     """Test download_archive() produces valid ZIP with correct structure."""
 
@@ -295,31 +300,38 @@ class TestArchiveDownload:
             names = zf.namelist()
             basenames = [n.split("/", 1)[1] if "/" in n else n for n in names]
 
-            assert any("README.md" in n for n in basenames), \
+            assert any("README.md" in n for n in basenames), (
                 f"README.md missing from archive. Contents: {names}"
-            assert any("document.md" in n for n in basenames), \
+            )
+            assert any("document.md" in n for n in basenames), (
                 f"document.md missing from archive. Contents: {names}"
-            assert any("entities.json" in n for n in basenames), \
+            )
+            assert any("entities.json" in n for n in basenames), (
                 f"entities.json missing from archive. Contents: {names}"
-            assert any("quality_report.json" in n for n in basenames), \
+            )
+            assert any("quality_report.json" in n for n in basenames), (
                 f"quality_report.json missing from archive. Contents: {names}"
-            assert any("metadata.json" in n for n in basenames), \
+            )
+            assert any("metadata.json" in n for n in basenames), (
                 f"metadata.json missing from archive. Contents: {names}"
+            )
 
             # Verify document.md matches DataPackage content
             doc_files = [n for n in names if n.endswith("document.md")]
             if doc_files:
                 doc_content = zf.read(doc_files[0]).decode("utf-8")
-                assert doc_content == pkg.document.markdown, \
+                assert doc_content == pkg.document.markdown, (
                     "document.md content doesn't match DataPackage markdown"
+                )
 
             # Verify entities.json has correct count
             ent_files = [n for n in names if n.endswith("entities.json")]
             if ent_files and pkg.entities:
                 ent_data = json.loads(zf.read(ent_files[0]))
                 items = ent_data.get("items", [])
-                assert len(items) == len(pkg.entities.items), \
+                assert len(items) == len(pkg.entities.items), (
                     f"entities.json has {len(items)} items, expected {len(pkg.entities.items)}"
+                )
 
         print(f"\n  [PASS] Archive download validated: {result_path}")
         print(f"    Files in archive: {len(names)}")
@@ -328,6 +340,7 @@ class TestArchiveDownload:
 # =========================================================================
 # 2d. Pricing and Billing Verification
 # =========================================================================
+
 
 class TestPricingBilling:
     """Verify Supabase billing records match expected values."""
@@ -351,17 +364,21 @@ class TestPricingBilling:
         assert db_job is not None, f"Job {job.id} not found in Supabase"
 
         # Status should be terminal
-        assert db_job["status"] in ("COMPLETED", "CACHED", "PULLED"), \
+        assert db_job["status"] in ("COMPLETED", "CACHED", "PULLED"), (
             f"Expected terminal status, got {db_job['status']}"
+        )
 
         # Total cost USD should be populated (worker-computed billing)
         total_cost = db_job.get("total_cost_usd")
-        assert total_cost is not None and float(total_cost) > 0, \
+        assert total_cost is not None and float(total_cost) > 0, (
             f"total_cost_usd should be > 0, got {total_cost}"
+        )
 
         # Stages should match
-        assert db_job["stages_completed"] == db_job["total_stages"], \
-            f"stages_completed ({db_job['stages_completed']}) != total_stages ({db_job['total_stages']})"
+        assert db_job["stages_completed"] == db_job["total_stages"], (
+            f"stages_completed ({db_job['stages_completed']})"
+            f" != total_stages ({db_job['total_stages']})"
+        )
 
         # Verify billed flag
         billed = db_job.get("billed")
@@ -380,6 +397,7 @@ class TestPricingBilling:
 # =========================================================================
 # 2e. Status Transition Tracking
 # =========================================================================
+
 
 class TestStatusTransitions:
     """Verify status transitions during pipeline execution."""
@@ -411,8 +429,9 @@ class TestStatusTransitions:
             time.sleep(1.5)
 
         terminal = {"COMPLETED", "CACHED", "PULLED"}
-        assert set(statuses_seen) & terminal, \
+        assert set(statuses_seen) & terminal, (
             f"Pipeline did not reach terminal state. Seen: {statuses_seen}"
+        )
 
         # Should see progression
         assert len(statuses_seen) >= 1, "Should observe at least one status"
@@ -426,6 +445,7 @@ class TestStatusTransitions:
 # =========================================================================
 # 2f. Error Handling
 # =========================================================================
+
 
 class TestErrorHandling:
     """Test error handling edge cases."""
@@ -456,6 +476,7 @@ class TestErrorHandling:
 # =========================================================================
 # Phase 3: merge() Convenience Utility Tests
 # =========================================================================
+
 
 class TestMergeUtility:
     """Test merge() produces document-centric, redundancy-free JSON."""
@@ -546,8 +567,7 @@ class TestMergeUtility:
 
         # Verify "markdown" key only exists once in the document
         keys_with_markdown = [k for k in doc if "markdown" in k.lower()]
-        assert len(keys_with_markdown) == 1, \
-            f"Expected 1 markdown key, found: {keys_with_markdown}"
+        assert len(keys_with_markdown) == 1, f"Expected 1 markdown key, found: {keys_with_markdown}"
 
         print("\n  [PASS] No redundancy: markdown appears exactly once")
 
@@ -569,7 +589,9 @@ class TestMergeUtility:
         assert file_content["id"] == merged["id"]
         assert file_content["status"] == merged["status"]
         assert len(file_content["documents"]) == len(merged["documents"])
-        assert file_content["summary"]["entities"]["total"] == merged["summary"]["entities"]["total"]
+        assert (
+            file_content["summary"]["entities"]["total"] == merged["summary"]["entities"]["total"]
+        )
 
         print(f"\n  [PASS] Merge save_to validated: {output_file}")
         print(f"    File size: {output_file.stat().st_size} bytes")
@@ -600,6 +622,7 @@ class TestMergeUtility:
 # =========================================================================
 # Phase 4: Final 360 Roundtrip Validation
 # =========================================================================
+
 
 class TestMergeRoundtrip:
     """Final 360 validation: verify consistent results across entry points."""
@@ -636,22 +659,25 @@ class TestMergeRoundtrip:
         # 2. Verify entity counts match between DataPackage and merge
         pkg_entity_count = pkg.entities.summary.total if pkg.entities else 0
         merge_entity_count = merged["summary"]["entities"]["total"]
-        assert pkg_entity_count == merge_entity_count, \
+        assert pkg_entity_count == merge_entity_count, (
             f"Entity count mismatch: DataPackage={pkg_entity_count}, merge={merge_entity_count}"
+        )
 
         # 3. Verify relations counts match
         pkg_rel_count = pkg.knowledge_graph.summary.total_relations if pkg.knowledge_graph else 0
         merge_rel_count = merged["summary"]["relations"]["total"]
-        assert pkg_rel_count == merge_rel_count, \
+        assert pkg_rel_count == merge_rel_count, (
             f"Relation count mismatch: DataPackage={pkg_rel_count}, merge={merge_rel_count}"
+        )
 
         # 4. Verify markdown matches
-        assert doc["markdown"] == pkg.document.markdown, \
+        assert doc["markdown"] == pkg.document.markdown, (
             "Markdown content mismatch between DataPackage and merge"
+        )
 
         # 5. Verify save_to produces identical output
         save_path = OUTPUT_DIR / "roundtrip.json"
-        saved = pkg.merge(save_to=str(save_path))
+        pkg.merge(save_to=str(save_path))
         reloaded = json.loads(save_path.read_text())
         assert reloaded["summary"]["entities"]["total"] == merged["summary"]["entities"]["total"]
         assert reloaded["documents"][0]["markdown"] == merged["documents"][0]["markdown"]
