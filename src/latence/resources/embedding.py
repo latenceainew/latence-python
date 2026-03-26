@@ -77,7 +77,7 @@ class Embedding(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = EmbedResponse.model_validate(response.data)
+            result = EmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -141,6 +141,6 @@ class AsyncEmbedding(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = EmbedResponse.model_validate(response.data)
+            result = EmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

@@ -192,7 +192,7 @@ class Job:
         Returns:
             Cancellation response from the API.
         """
-        return self._pipeline.cancel(self._id)
+        return self._pipeline.cancel(self._id)  # type: ignore[return-value]
 
     def resume(self) -> "Job":
         """Resume this pipeline from its last checkpoint.
@@ -400,7 +400,7 @@ class AsyncJob:
 
     async def cancel(self) -> dict[str, Any]:
         """Cancel this pipeline job."""
-        return await self._pipeline.cancel(self._id)
+        return await self._pipeline.cancel(self._id)  # type: ignore[return-value]
 
     async def resume(self) -> "AsyncJob":
         """Resume this pipeline from its last checkpoint.

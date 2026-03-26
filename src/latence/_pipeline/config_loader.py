@@ -181,7 +181,7 @@ def load_pipeline_config(
         ImportError: If PyYAML is not installed.
     """
     try:
-        import yaml
+        import yaml  # type: ignore[import-untyped]
     except ImportError:
         raise ImportError(
             "PyYAML is required for YAML config loading. Install it with: pip install pyyaml"

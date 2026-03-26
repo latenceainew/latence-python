@@ -468,7 +468,7 @@ class Pipeline(SyncResource):
         if _pipeline_input_override is not None:
             pipeline_input = _pipeline_input_override
         else:
-            pipeline_input = self._build_pipeline_input(
+            pipeline_input = self._build_pipeline_input(  # type: ignore[assignment]
                 files=files,
                 file_urls=file_urls,
                 text=text,
@@ -494,7 +494,8 @@ class Pipeline(SyncResource):
         svc_configs = {sc.service: sc.config for sc in config.services}
         body: dict[str, Any] = {
             "services": [
-                {"service": s, "config": svc_configs.get(s, {})} for s in validation.services
+                {"service": s, "config": svc_configs.get(s, {})}
+                for s in validation.services  # type: ignore[call-overload]
             ],
             "store_intermediate": config.store_intermediate,
             "input": pipeline_input.model_dump(exclude_none=True),
@@ -643,8 +644,8 @@ class Pipeline(SyncResource):
         result = PipelineResultResponse.model_validate(data)
         # Attach raw ZIP data for downstream merge() usage
         if _zip_meta:
-            result._zip_manifest = _zip_meta.get("_zip_manifest", {})  # type: ignore[attr-defined]
-            result._zip_documents = _zip_meta.get("_zip_documents", {})  # type: ignore[attr-defined]
+            result._zip_manifest = _zip_meta.get("_zip_manifest", {})
+            result._zip_documents = _zip_meta.get("_zip_documents", {})
         return self._inject_metadata(result, response)
 
     def cancel(self, job_id: str) -> JobCancelResponse:
@@ -817,7 +818,7 @@ class Pipeline(SyncResource):
             raw = response.content
             if _is_zip(response, raw):
                 return _parse_pipeline_zip(raw)
-            return json.loads(raw)
+            return json.loads(raw)  # type: ignore[no-any-return]
 
 
 class AsyncPipeline(AsyncResource):
@@ -988,7 +989,7 @@ class AsyncPipeline(AsyncResource):
         if _pipeline_input_override is not None:
             pipeline_input = _pipeline_input_override
         else:
-            pipeline_input, pending_files = self._build_pipeline_input(
+            pipeline_input, pending_files = self._build_pipeline_input(  # type: ignore[assignment]
                 files=files,
                 file_urls=file_urls,
                 text=text,
@@ -1016,7 +1017,8 @@ class AsyncPipeline(AsyncResource):
         svc_configs = {sc.service: sc.config for sc in config.services}
         body: dict[str, Any] = {
             "services": [
-                {"service": s, "config": svc_configs.get(s, {})} for s in validation.services
+                {"service": s, "config": svc_configs.get(s, {})}
+                for s in validation.services  # type: ignore[call-overload]
             ],
             "store_intermediate": config.store_intermediate,
             "input": pipeline_input.model_dump(exclude_none=True),
@@ -1163,8 +1165,8 @@ class AsyncPipeline(AsyncResource):
 
         result = PipelineResultResponse.model_validate(data)
         if _zip_meta:
-            result._zip_manifest = _zip_meta.get("_zip_manifest", {})  # type: ignore[attr-defined]
-            result._zip_documents = _zip_meta.get("_zip_documents", {})  # type: ignore[attr-defined]
+            result._zip_manifest = _zip_meta.get("_zip_manifest", {})
+            result._zip_documents = _zip_meta.get("_zip_documents", {})
         return self._inject_metadata(result, response)
 
     async def cancel(self, job_id: str) -> JobCancelResponse:
@@ -1333,4 +1335,4 @@ class AsyncPipeline(AsyncResource):
             raw = response.content
             if _is_zip(response, raw):
                 return _parse_pipeline_zip(raw)
-            return json.loads(raw)
+            return json.loads(raw)  # type: ignore[no-any-return]

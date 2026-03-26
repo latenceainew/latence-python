@@ -175,6 +175,7 @@ class BaseSyncClient:
     @property
     def api_key(self) -> str:
         """The API key (read-only)."""
+        assert self._api_key is not None
         return self._api_key
 
     def close(self) -> None:
@@ -293,6 +294,7 @@ class BaseAsyncClient:
     @property
     def api_key(self) -> str:
         """The API key (read-only)."""
+        assert self._api_key is not None
         return self._api_key
 
     async def close(self) -> None:

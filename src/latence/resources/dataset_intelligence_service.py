@@ -89,7 +89,7 @@ class DatasetIntelligenceService(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = DatasetIntelligenceResponse.model_validate(response.data)
+            result = DatasetIntelligenceResponse.model_validate(response.data)  # type: ignore[assignment]
         return self._inject_metadata(result, response)
 
     def _upload_di_payload(self, payload_bytes: bytes, dataset_id: str | None = None) -> str:
@@ -269,7 +269,7 @@ class AsyncDatasetIntelligenceService(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = DatasetIntelligenceResponse.model_validate(response.data)
+            result = DatasetIntelligenceResponse.model_validate(response.data)  # type: ignore[assignment]
         return self._inject_metadata(result, response)
 
     async def _upload_di_payload(self, payload_bytes: bytes, dataset_id: str | None = None) -> str:

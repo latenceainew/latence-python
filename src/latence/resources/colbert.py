@@ -82,7 +82,7 @@ class ColBERT(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ColBERTEmbedResponse.model_validate(response.data)
+            result = ColBERTEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -151,6 +151,6 @@ class AsyncColBERT(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ColBERTEmbedResponse.model_validate(response.data)
+            result = ColBERTEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

@@ -61,14 +61,14 @@ from .pipeline import (
     PipelineConfig,
     PipelineExecutionSummary,
     PipelineInput,
-    PipelineReport,  # noqa: F401
+    PipelineReport,
     PipelineResultResponse,
     PipelineStatusResponse,
     PipelineSubmitResponse,
     PipelineValidationResult,
     ServiceConfig,
     ServiceName,
-    StageDownload,  # noqa: F401
+    StageDownload,
     StageResult,
     StageStatus,
 )
@@ -129,6 +129,8 @@ __all__ = [
     "PipelineValidationResult",
     "ServiceConfig",
     "ServiceName",
+    "PipelineReport",
+    "StageDownload",
     "StageResult",
     "StageStatus",
     # Redaction

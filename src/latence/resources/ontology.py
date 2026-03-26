@@ -110,7 +110,7 @@ class Ontology(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = BuildGraphResponse.model_validate(response.data)
+            result = BuildGraphResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -196,6 +196,6 @@ class AsyncOntology(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = BuildGraphResponse.model_validate(response.data)
+            result = BuildGraphResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

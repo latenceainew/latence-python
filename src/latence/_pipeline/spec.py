@@ -221,7 +221,7 @@ def parse_steps_config(steps: dict[str, dict[str, Any]]) -> list[ServiceConfig]:
 
     for name, config in steps.items():
         service_name = resolve_step_name(name)
-        configs[service_name] = ServiceConfig(service=service_name, config=config or {})
+        configs[service_name] = ServiceConfig(service=service_name, config=config or {})  # type: ignore[arg-type]
 
     ordered = _topological_sort(list(configs.keys()))
     return [configs[s] for s in ordered if s in configs]

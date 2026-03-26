@@ -5,10 +5,10 @@ from __future__ import annotations
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, BinaryIO, Literal, Union, overload
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Union, overload
 
 try:
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 
     HAS_BEAUTIFULSOUP = True
 except ImportError:
@@ -73,9 +73,9 @@ class DocumentIntelligence(SyncResource):
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
         max_pages: int | None = None,
         target_longest: int | None = None,
-        pipeline_options: PipelineOptions | dict | None = None,
-        predict_options: PredictOptions | dict | None = None,
-        output_options: OutputOptions | dict | None = None,
+        pipeline_options: PipelineOptions | dict[str, Any] | None = None,
+        predict_options: PredictOptions | dict[str, Any] | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         use_layout_detection: bool | None = None,
         use_chart_recognition: bool | None = None,
         request_id: str | None = None,
@@ -94,9 +94,9 @@ class DocumentIntelligence(SyncResource):
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
         max_pages: int | None = None,
         target_longest: int | None = None,
-        pipeline_options: PipelineOptions | dict | None = None,
-        predict_options: PredictOptions | dict | None = None,
-        output_options: OutputOptions | dict | None = None,
+        pipeline_options: PipelineOptions | dict[str, Any] | None = None,
+        predict_options: PredictOptions | dict[str, Any] | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         use_layout_detection: bool | None = None,
         use_chart_recognition: bool | None = None,
         request_id: str | None = None,
@@ -114,9 +114,9 @@ class DocumentIntelligence(SyncResource):
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
         max_pages: int | None = None,
         target_longest: int | None = None,
-        pipeline_options: PipelineOptions | dict | None = None,
-        predict_options: PredictOptions | dict | None = None,
-        output_options: OutputOptions | dict | None = None,
+        pipeline_options: PipelineOptions | dict[str, Any] | None = None,
+        predict_options: PredictOptions | dict[str, Any] | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         use_layout_detection: bool | None = None,
         use_chart_recognition: bool | None = None,
         request_id: str | None = None,
@@ -228,7 +228,7 @@ class DocumentIntelligence(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ProcessDocumentResponse.model_validate(response.data)
+            result = ProcessDocumentResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -236,10 +236,10 @@ class DocumentIntelligence(SyncResource):
     def refine(
         self,
         *,
-        pages_result: list[dict],
-        refine_options: RefineOptions | dict | None = None,
+        pages_result: list[dict[str, Any]],
+        refine_options: RefineOptions | dict[str, Any] | None = None,
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
-        output_options: OutputOptions | dict | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         request_id: str | None = None,
         return_job: Literal[False] = False,
     ) -> ProcessDocumentResponse: ...
@@ -248,10 +248,10 @@ class DocumentIntelligence(SyncResource):
     def refine(
         self,
         *,
-        pages_result: list[dict],
-        refine_options: RefineOptions | dict | None = None,
+        pages_result: list[dict[str, Any]],
+        refine_options: RefineOptions | dict[str, Any] | None = None,
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
-        output_options: OutputOptions | dict | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         request_id: str | None = None,
         return_job: Literal[True],
     ) -> JobSubmittedResponse: ...
@@ -259,10 +259,10 @@ class DocumentIntelligence(SyncResource):
     def refine(
         self,
         *,
-        pages_result: list[dict],
-        refine_options: RefineOptions | dict | None = None,
+        pages_result: list[dict[str, Any]],
+        refine_options: RefineOptions | dict[str, Any] | None = None,
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
-        output_options: OutputOptions | dict | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         request_id: str | None = None,
         return_job: bool = False,
     ) -> Union[ProcessDocumentResponse, JobSubmittedResponse]:
@@ -297,7 +297,7 @@ class DocumentIntelligence(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ProcessDocumentResponse.model_validate(response.data)
+            result = ProcessDocumentResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -320,9 +320,9 @@ class AsyncDocumentIntelligence(AsyncResource):
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
         max_pages: int | None = None,
         target_longest: int | None = None,
-        pipeline_options: PipelineOptions | dict | None = None,
-        predict_options: PredictOptions | dict | None = None,
-        output_options: OutputOptions | dict | None = None,
+        pipeline_options: PipelineOptions | dict[str, Any] | None = None,
+        predict_options: PredictOptions | dict[str, Any] | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         use_layout_detection: bool | None = None,
         use_chart_recognition: bool | None = None,
         request_id: str | None = None,
@@ -341,9 +341,9 @@ class AsyncDocumentIntelligence(AsyncResource):
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
         max_pages: int | None = None,
         target_longest: int | None = None,
-        pipeline_options: PipelineOptions | dict | None = None,
-        predict_options: PredictOptions | dict | None = None,
-        output_options: OutputOptions | dict | None = None,
+        pipeline_options: PipelineOptions | dict[str, Any] | None = None,
+        predict_options: PredictOptions | dict[str, Any] | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         use_layout_detection: bool | None = None,
         use_chart_recognition: bool | None = None,
         request_id: str | None = None,
@@ -361,9 +361,9 @@ class AsyncDocumentIntelligence(AsyncResource):
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
         max_pages: int | None = None,
         target_longest: int | None = None,
-        pipeline_options: PipelineOptions | dict | None = None,
-        predict_options: PredictOptions | dict | None = None,
-        output_options: OutputOptions | dict | None = None,
+        pipeline_options: PipelineOptions | dict[str, Any] | None = None,
+        predict_options: PredictOptions | dict[str, Any] | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         use_layout_detection: bool | None = None,
         use_chart_recognition: bool | None = None,
         request_id: str | None = None,
@@ -474,7 +474,7 @@ class AsyncDocumentIntelligence(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ProcessDocumentResponse.model_validate(response.data)
+            result = ProcessDocumentResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -482,10 +482,10 @@ class AsyncDocumentIntelligence(AsyncResource):
     async def refine(
         self,
         *,
-        pages_result: list[dict],
-        refine_options: RefineOptions | dict | None = None,
+        pages_result: list[dict[str, Any]],
+        refine_options: RefineOptions | dict[str, Any] | None = None,
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
-        output_options: OutputOptions | dict | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         request_id: str | None = None,
         return_job: Literal[False] = False,
     ) -> ProcessDocumentResponse: ...
@@ -494,10 +494,10 @@ class AsyncDocumentIntelligence(AsyncResource):
     async def refine(
         self,
         *,
-        pages_result: list[dict],
-        refine_options: RefineOptions | dict | None = None,
+        pages_result: list[dict[str, Any]],
+        refine_options: RefineOptions | dict[str, Any] | None = None,
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
-        output_options: OutputOptions | dict | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         request_id: str | None = None,
         return_job: Literal[True],
     ) -> JobSubmittedResponse: ...
@@ -505,10 +505,10 @@ class AsyncDocumentIntelligence(AsyncResource):
     async def refine(
         self,
         *,
-        pages_result: list[dict],
-        refine_options: RefineOptions | dict | None = None,
+        pages_result: list[dict[str, Any]],
+        refine_options: RefineOptions | dict[str, Any] | None = None,
         output_format: Literal["markdown", "json", "html", "xlsx"] = "markdown",
-        output_options: OutputOptions | dict | None = None,
+        output_options: OutputOptions | dict[str, Any] | None = None,
         request_id: str | None = None,
         return_job: bool = False,
     ) -> Union[ProcessDocumentResponse, JobSubmittedResponse]:
@@ -543,7 +543,7 @@ class AsyncDocumentIntelligence(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ProcessDocumentResponse.model_validate(response.data)
+            result = ProcessDocumentResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 

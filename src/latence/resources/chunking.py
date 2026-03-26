@@ -120,7 +120,7 @@ class Chunking(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ChunkResponse.model_validate(response.data)
+            result = ChunkResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -201,6 +201,6 @@ class AsyncChunking(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ChunkResponse.model_validate(response.data)
+            result = ChunkResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

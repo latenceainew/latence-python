@@ -101,7 +101,7 @@ class Enrichment(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ChunkResponse.model_validate(response.data)
+            result = ChunkResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -190,7 +190,7 @@ class Enrichment(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = EnrichResponse.model_validate(response.data)
+            result = EnrichResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -271,7 +271,7 @@ class AsyncEnrichment(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ChunkResponse.model_validate(response.data)
+            result = ChunkResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -345,6 +345,6 @@ class AsyncEnrichment(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = EnrichResponse.model_validate(response.data)
+            result = EnrichResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

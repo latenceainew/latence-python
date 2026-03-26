@@ -197,7 +197,7 @@ def _check_service_chain_compatibility(
                     )
 
         if service_output != "unknown":
-            available_data.add(service_output)
+            available_data.add(service_output)  # type: ignore[arg-type]
         if service == "document_intelligence":
             available_data.add("text")
         if service == "extraction":

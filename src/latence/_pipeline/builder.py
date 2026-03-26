@@ -600,7 +600,7 @@ class PipelineBuilder:
         if result.auto_injected:
             svc_map = {sc.service: sc for sc in services}
             services = [
-                svc_map.get(s, ServiceConfig(service=s, config={}))  # type: ignore[arg-type]
+                svc_map.get(s, ServiceConfig(service=s, config={}))  # type: ignore[call-overload, arg-type]
                 for s in result.services
             ]
             if not self._strict_mode:

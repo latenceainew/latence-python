@@ -870,7 +870,7 @@ def _build_document_section(
         pages = []
         for p in raw_pages:
             if isinstance(p, dict):
-                pages.append(p.get("markdown", p.get("content", str(p))))
+                pages.append(p.get("markdown", p.get("content", str(p))))  # type: ignore[arg-type]
             else:
                 pages.append(str(p))
 

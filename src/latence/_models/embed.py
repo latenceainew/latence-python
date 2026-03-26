@@ -121,7 +121,7 @@ class UnifiedEmbedResponse(BaseResponse):
                 "late_interaction": "colbert",
                 "image": "colpali",
             }
-            data["model"] = model_map.get(embed_type, "embedding")
+            data["model"] = model_map.get(embed_type, "embedding")  # type: ignore[arg-type]
 
         # Compute tokens/patches from shape if missing
         if embed_type == "late_interaction":

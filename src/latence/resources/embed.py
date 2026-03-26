@@ -129,7 +129,7 @@ class Embed(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = UnifiedEmbedResponse.model_validate(response.data)
+            result = UnifiedEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -225,7 +225,7 @@ class Embed(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = UnifiedEmbedResponse.model_validate(response.data)
+            result = UnifiedEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -336,7 +336,7 @@ class Embed(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = UnifiedEmbedResponse.model_validate(response.data)
+            result = UnifiedEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -421,7 +421,7 @@ class AsyncEmbed(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = UnifiedEmbedResponse.model_validate(response.data)
+            result = UnifiedEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -490,7 +490,7 @@ class AsyncEmbed(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = UnifiedEmbedResponse.model_validate(response.data)
+            result = UnifiedEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -574,6 +574,6 @@ class AsyncEmbed(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = UnifiedEmbedResponse.model_validate(response.data)
+            result = UnifiedEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

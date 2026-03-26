@@ -106,7 +106,7 @@ class Extraction(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ExtractResponse.model_validate(response.data)
+            result = ExtractResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -195,6 +195,6 @@ class AsyncExtraction(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ExtractResponse.model_validate(response.data)
+            result = ExtractResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

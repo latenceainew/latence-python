@@ -101,7 +101,7 @@ class ColPali(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ColPaliEmbedResponse.model_validate(response.data)
+            result = ColPaliEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -183,6 +183,6 @@ class AsyncColPali(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = ColPaliEmbedResponse.model_validate(response.data)
+            result = ColPaliEmbedResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

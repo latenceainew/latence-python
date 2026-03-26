@@ -104,7 +104,7 @@ class Redaction(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = DetectPIIResponse.model_validate(response.data)
+            result = DetectPIIResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -192,6 +192,6 @@ class AsyncRedaction(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = DetectPIIResponse.model_validate(response.data)
+            result = DetectPIIResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)

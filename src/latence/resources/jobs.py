@@ -242,7 +242,7 @@ class Jobs(SyncResource):
         with httpx.Client(timeout=B2_FETCH_TIMEOUT) as client:
             response = client.get(url)
             response.raise_for_status()
-            return response.json()
+            return response.json()  # type: ignore[no-any-return]
 
 
 class AsyncJobs(AsyncResource):
@@ -448,4 +448,4 @@ class AsyncJobs(AsyncResource):
         async with httpx.AsyncClient(timeout=B2_FETCH_TIMEOUT) as client:
             response = await client.get(url)
             response.raise_for_status()
-            return response.json()
+            return response.json()  # type: ignore[no-any-return]

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Literal
+from typing import Any, Literal
 
 # Create SDK logger with NullHandler to prevent "No handler found" warnings
 logger = logging.getLogger("latence")
@@ -63,7 +63,7 @@ def _init_logging() -> None:
 _init_logging()
 
 
-def log_request(method: str, path: str, **kwargs) -> None:
+def log_request(method: str, path: str, **kwargs: Any) -> None:
     """Log an outgoing request."""
     logger.debug(f"Request: {method} {path}")
     if kwargs and logger.isEnabledFor(logging.DEBUG):

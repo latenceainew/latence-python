@@ -100,7 +100,7 @@ class Compression(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = CompressResponse.model_validate(response.data)
+            result = CompressResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -181,7 +181,7 @@ class Compression(SyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = CompressMessagesResponse.model_validate(response.data)
+            result = CompressMessagesResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -269,7 +269,7 @@ class AsyncCompression(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = CompressResponse.model_validate(response.data)
+            result = CompressResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
 
@@ -349,6 +349,6 @@ class AsyncCompression(AsyncResource):
         if return_job:
             result = JobSubmittedResponse.model_validate(response.data)
         else:
-            result = CompressMessagesResponse.model_validate(response.data)
+            result = CompressMessagesResponse.model_validate(response.data)  # type: ignore[assignment]
 
         return self._inject_metadata(result, response)
