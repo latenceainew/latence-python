@@ -17,9 +17,9 @@
 
 <p align="center">
   <a href="#quickstart">Quickstart</a> &bull;
-  <a href="#act-1--trace-your-answers">Trace</a> &bull;
-  <a href="#act-2--upgrade-data-quality">Upgrade Data Quality</a> &bull;
-  <a href="#act-3--upgrade-retrieval">Upgrade Retrieval</a> &bull;
+  <a href="#step-1--trace-your-answers">Trace</a> &bull;
+  <a href="#step-2--upgrade-data-quality">Upgrade Data Quality</a> &bull;
+  <a href="#step-3--upgrade-retrieval">Upgrade Retrieval</a> &bull;
   <a href="docs/trace.md">Trace Reference</a> &bull;
   <a href="SDK_TUTORIAL.md">Full Tutorial</a>
 </p>
@@ -49,7 +49,7 @@ That's it. You now know whether the answer was grounded, how much of your retrie
 
 ---
 
-## Act 1 &mdash; Trace your answers
+## Step 1 &mdash; Trace your answers
 
 Three lanes, one mental model. Pick the one that matches what your app is doing right now.
 
@@ -120,8 +120,8 @@ The numbers above are not diagnostics. They are routing rules:
 
 | Signal | Meaning | Next step |
 |---|---|---|
-| `band` amber/red, low `context_coverage_ratio` | The answer isn't grounded in what you retrieved. | **[Upgrade data quality](#act-2--upgrade-data-quality)** &mdash; your upstream documents are the bottleneck. |
-| High `context_unused_ratio`, `retrieval_waste_pct > 30%` | You retrieved the wrong chunks. | **[Upgrade retrieval](#act-3--upgrade-retrieval)** &mdash; your retriever is the bottleneck. |
+| `band` amber/red, low `context_coverage_ratio` | The answer isn't grounded in what you retrieved. | **[Upgrade data quality](#step-2--upgrade-data-quality)** &mdash; your upstream documents are the bottleneck. |
+| High `context_unused_ratio`, `retrieval_waste_pct > 30%` | You retrieved the wrong chunks. | **[Upgrade retrieval](#step-3--upgrade-retrieval)** &mdash; your retriever is the bottleneck. |
 | `session_signals.recommendation = "re_anchor"` / `"fresh_chat"` on the code lane | Session drift is compounding. | Reset the agent's context on the next turn. |
 
 Full reference: [Trace docs](docs/trace.md) and [SDK tutorial &sect;18](SDK_TUTORIAL.md#18-direct-api-trace-groundedness--phantom-scoring).
@@ -142,7 +142,7 @@ async with AsyncLatence() as client:
 
 ---
 
-## Act 2 &mdash; Upgrade data quality
+## Step 2 &mdash; Upgrade data quality
 
 Trace is showing low coverage or amber/red bands? The model is rarely the problem. It's usually the upstream data: un-OCR'd PDFs, missing entities, unresolved references. The Latence **Data Intelligence Pipeline** cleans that in one call.
 
@@ -196,7 +196,7 @@ See [docs/dataset_intelligence.md](docs/dataset_intelligence.md).
 
 ---
 
-## Act 3 &mdash; Upgrade retrieval
+## Step 3 &mdash; Upgrade retrieval
 
 If Trace keeps flagging a high `context_unused_ratio`, or the session rollup shows `retrieval_waste_pct > 30%`, your model isn't the problem &mdash; **your retrieval engine is shipping the wrong chunks**.
 
