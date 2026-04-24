@@ -3,6 +3,12 @@ name: Publish to PyPI
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      wheel_build_tag:
+        description: "Optional same-version wheel build tag, e.g. 1 for latence-0.1.2-1-py3-none-any.whl"
+        required: false
+        default: ""
 
 jobs:
   publish:
@@ -28,6 +34,12 @@ jobs:
 
     - name: Build package
       run: python -m build
+
+    - name: Retag wheel for same-version refresh
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.wheel_build_tag != '' }}
+      run: |
+        pip install wheel
+        python -m wheel tags --remove --build "${{ inputs.wheel_build_tag }}" dist/*.whl
 
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
