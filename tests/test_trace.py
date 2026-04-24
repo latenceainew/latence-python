@@ -554,8 +554,15 @@ class TestRollupRequestBody:
         assert isinstance(body["turns"], list)
         assert len(body["turns"]) == 2
         assert all(isinstance(t, dict) for t in body["turns"])
-        # Code-lane-specific fields propagate.
-        assert body["turns"][0].get("code_lane") is not None
+        # Response objects are mapped to the handler's RollupTurnInput shape,
+        # not passed through with fields the gateway rejects.
+        assert body["turns"][0].get("scores") is not None
+        assert body["turns"][0].get("risk_band") == turn1.band
+        assert body["turns"][0].get("session_signals") is not None
+        assert "code_lane" not in body["turns"][0]
+        assert body["turns"][1].get("scores") is not None
+        assert body["turns"][1].get("risk_band") == turn2.band
+        assert "success" not in body["turns"][1]
         assert body["session_id"] == "sess_abc"
 
     def test_rollup_default_heatmap_not_sent(self):

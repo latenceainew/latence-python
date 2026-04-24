@@ -94,14 +94,53 @@ def _normalize_session_state(
 def _normalize_turns(
     turns: list[TraceResponse | dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Coerce a list of scoring responses / dicts to the rollup turn shape."""
+    """Coerce a list of scoring responses / dicts to the rollup turn shape.
+
+    The rollup handler expects ``RollupTurnInput`` with fields
+    ``scores``, ``risk_band``, ``file_attribution``, ``session_signals``,
+    ``recommendation``, ``timestamp`` — NOT the flat ``TraceResponse``
+    fields like ``score`` / ``band`` / ``success``.
+    """
     out: list[dict[str, Any]] = []
     for turn in turns:
         if isinstance(turn, TraceResponse):
-            out.append(turn.model_dump(exclude_none=True))
+            d = turn.model_dump(exclude_none=True)
+            out.append(_trace_response_to_rollup_turn(d))
+        elif isinstance(turn, dict):
+            if "scores" in turn or "risk_band" in turn:
+                out.append(turn)
+            else:
+                out.append(_trace_response_to_rollup_turn(turn))
         else:
             out.append(turn)
     return out
+
+
+def _trace_response_to_rollup_turn(d: dict[str, Any]) -> dict[str, Any]:
+    """Map flat TraceResponse dict to the RollupTurnInput shape."""
+    turn: dict[str, Any] = {}
+
+    scores: dict[str, float | None] = {}
+    if "score" in d and d["score"] is not None:
+        metric = d.get("primary_metric", "groundedness_v2")
+        scores[metric] = d["score"]
+    if "context_coverage_ratio" in d:
+        scores["context_coverage_ratio"] = d["context_coverage_ratio"]
+    if "context_usage_ratio" in d:
+        scores["context_usage_ratio"] = d["context_usage_ratio"]
+    if "nli_aggregate" in d:
+        scores["nli_aggregate"] = d["nli_aggregate"]
+    if scores:
+        turn["scores"] = scores
+
+    if "band" in d:
+        turn["risk_band"] = d["band"]
+
+    for passthrough in ("file_attribution", "session_signals", "recommendation", "timestamp"):
+        if passthrough in d and d[passthrough] is not None:
+            turn[passthrough] = d[passthrough]
+
+    return turn
 
 
 def _require_premise_lane(
