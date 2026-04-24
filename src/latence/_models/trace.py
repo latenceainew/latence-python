@@ -42,13 +42,18 @@ HeatmapFormat = Literal["none", "data", "html"]
 """Heatmap emission mode. ``data`` = structured JSON, ``html`` = <div> fragment."""
 
 ResponseLanguageHint = Literal[
-    "python", "py",
-    "typescript", "ts",
+    "python",
+    "py",
+    "typescript",
+    "ts",
     "tsx",
-    "javascript", "js",
+    "javascript",
+    "js",
     "jsx",
-    "go", "golang",
-    "rust", "rs",
+    "go",
+    "golang",
+    "rust",
+    "rs",
 ]
 """Source-language hint for the code lane's AST extractor."""
 
@@ -73,9 +78,13 @@ class SupportUnitInput(BaseModel):
 
     text: str = Field(description="The unit's content; what the response may cite.")
     source_id: str | None = Field(default=None, description="Stable identifier for the source.")
-    speaker: str | None = Field(default=None, description="Speaker / author label (transcripts, chats).")
+    speaker: str | None = Field(
+        default=None, description="Speaker / author label (transcripts, chats)."
+    )
     timestamp: str | None = Field(default=None, description="Free-form timestamp for the unit.")
-    metadata: dict[str, Any] | None = Field(default=None, description="Arbitrary passthrough metadata.")
+    metadata: dict[str, Any] | None = Field(
+        default=None, description="Arbitrary passthrough metadata."
+    )
 
 
 class SessionState(BaseModel):
@@ -102,8 +111,12 @@ class SupportUnitUsage(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     index: int | None = Field(default=None, description="Position of the unit in the request list.")
-    source_id: str | None = Field(default=None, description="Echoed ``source_id`` from the request.")
-    usage_state: str | None = Field(default=None, description="``used`` / ``unused`` / ``uncertain``.")
+    source_id: str | None = Field(
+        default=None, description="Echoed ``source_id`` from the request."
+    )
+    usage_state: str | None = Field(
+        default=None, description="``used`` / ``unused`` / ``uncertain``."
+    )
     coverage_score: float | None = Field(default=None, description="Per-unit coverage score.")
 
 
@@ -174,25 +187,52 @@ class TraceResponse(BaseResponse):
     # ``str`` (not the input Literal) on purpose -- the pod can emit
     # derived metric names such as ``"groundedness_v2"`` that are not in
     # the request-side ``PrimaryMetric`` enum.
-    primary_metric: str | None = Field(default=None, description="Metric backing ``score`` (echoed by the pod; may be a derived name).")
-    band: str | None = Field(default=None, description="Risk band label (e.g. green/amber/red/unknown).")
-    structured_score: dict[str, Any] | None = Field(default=None, description="Per-component score breakdown.")
+    primary_metric: str | None = Field(
+        default=None,
+        description="Metric backing ``score`` (echoed by the pod; may be a derived name).",
+    )
+    band: str | None = Field(
+        default=None, description="Risk band label (e.g. green/amber/red/unknown)."
+    )
+    structured_score: dict[str, Any] | None = Field(
+        default=None, description="Per-component score breakdown."
+    )
     nli_aggregate: float | None = Field(default=None, description="Aggregate NLI entailment score.")
-    context_coverage_ratio: float | None = Field(default=None, description="Fraction of the response grounded in context.")
-    context_usage_ratio: float | None = Field(default=None, description="Fraction of context actually used.")
-    context_unused_ratio: float | None = Field(default=None, description="Fraction of context left unused.")
-    context_uncertain_ratio: float | None = Field(default=None, description="Fraction with uncertain grounding.")
-    support_units_usage: SupportUnitsUsageSummary | None = Field(default=None, description="Aggregate per-state counts.")
-    support_units: list[SupportUnitUsage] | None = Field(default=None, description="Per-unit verdicts.")
+    context_coverage_ratio: float | None = Field(
+        default=None, description="Fraction of the response grounded in context."
+    )
+    context_usage_ratio: float | None = Field(
+        default=None, description="Fraction of context actually used."
+    )
+    context_unused_ratio: float | None = Field(
+        default=None, description="Fraction of context left unused."
+    )
+    context_uncertain_ratio: float | None = Field(
+        default=None, description="Fraction with uncertain grounding."
+    )
+    support_units_usage: SupportUnitsUsageSummary | None = Field(
+        default=None, description="Aggregate per-state counts."
+    )
+    support_units: list[SupportUnitUsage] | None = Field(
+        default=None, description="Per-unit verdicts."
+    )
     latency_ms: float | None = Field(default=None, description="Pod-side scoring latency.")
-    scoring_mode: ScoringMode | None = Field(default=None, description="Lane echoed back by the pod.")
-    session_id: str | None = Field(default=None, description="Session id echoed back when supplied.")
+    scoring_mode: ScoringMode | None = Field(
+        default=None, description="Lane echoed back by the pod."
+    )
+    session_id: str | None = Field(
+        default=None, description="Session id echoed back when supplied."
+    )
     version: str | None = Field(default=None, description="Pod handler version tag.")
     reason: str | None = Field(default=None, description="Human-readable reason for the band.")
     warnings: list[str] | None = Field(default=None, description="Scorer warnings (non-fatal).")
-    file_attribution: FileAttribution | None = Field(default=None, description="Per-file owner share + reason codes.")
+    file_attribution: FileAttribution | None = Field(
+        default=None, description="Per-file owner share + reason codes."
+    )
     heatmap: Heatmap | None = Field(default=None, description="Structured heatmap payload.")
-    heatmap_html: str | None = Field(default=None, description="Self-contained <div> fragment (when heatmap_format='html').")
+    heatmap_html: str | None = Field(
+        default=None, description="Self-contained <div> fragment (when heatmap_format='html')."
+    )
 
 
 class TraceRagResponse(TraceResponse):
@@ -233,20 +273,38 @@ class TraceRollupResponse(BaseResponse):
     Mirrors the gateway's ``/rollup`` ``response_extract``.
     """
 
-    scoring_mode: str | None = Field(default=None, description="Always ``'rollup'`` on this endpoint.")
-    turns_processed: int | None = Field(default=None, description="Number of per-turn outputs aggregated.")
+    scoring_mode: str | None = Field(
+        default=None, description="Always ``'rollup'`` on this endpoint."
+    )
+    turns_processed: int | None = Field(
+        default=None, description="Number of per-turn outputs aggregated."
+    )
     noise_pct: float | None = Field(default=None, description="Fraction of turns flagged as noise.")
-    model_drift_pct: float | None = Field(default=None, description="Fraction of turns exhibiting model drift.")
-    retrieval_waste_pct: float | None = Field(default=None, description="Fraction of retrieved context left unused.")
-    reason_code_histogram: dict[str, int] | None = Field(default=None, description="Count of each reason code over the window.")
-    recommendations: list[str] | None = Field(default=None, description="Session-level recommendations.")
-    risk_band_trail: list[str] | None = Field(default=None, description="Risk band per turn, chronological.")
+    model_drift_pct: float | None = Field(
+        default=None, description="Fraction of turns exhibiting model drift."
+    )
+    retrieval_waste_pct: float | None = Field(
+        default=None, description="Fraction of retrieved context left unused."
+    )
+    reason_code_histogram: dict[str, int] | None = Field(
+        default=None, description="Count of each reason code over the window."
+    )
+    recommendations: list[str] | None = Field(
+        default=None, description="Session-level recommendations."
+    )
+    risk_band_trail: list[str] | None = Field(
+        default=None, description="Risk band per turn, chronological."
+    )
     drift_trend: dict[str, Any] | None = Field(
         default=None,
         description="Drift trajectory summary over the window (``{last, max, mean, min, ...}``).",
     )
-    top_dead_files: list[Any] | None = Field(default=None, description="Files consistently marked dead-weight.")
+    top_dead_files: list[Any] | None = Field(
+        default=None, description="Files consistently marked dead-weight."
+    )
     heatmap: Heatmap | None = Field(default=None, description="Session-level heatmap payload.")
-    heatmap_html: str | None = Field(default=None, description="Self-contained <div> fragment (when heatmap_format='html').")
+    heatmap_html: str | None = Field(
+        default=None, description="Self-contained <div> fragment (when heatmap_format='html')."
+    )
     session_id: str | None = Field(default=None, description="Echoed session id.")
     version: str | None = Field(default=None, description="Rollup handler version tag.")

@@ -29,7 +29,6 @@ from latence.resources.experimental import (
 )
 from latence.resources.trace import AsyncTrace, Trace
 
-
 # ---------------------------------------------------------------------------
 # Fake clients (mirror tests/test_refinery.py)
 # ---------------------------------------------------------------------------
@@ -252,7 +251,7 @@ class TestModelParsing:
         data = {
             "success": True,
             "score": 0.9235278423332299,
-            "primary_metric": "groundedness_v2",   # <- NOT in the request-side Literal
+            "primary_metric": "groundedness_v2",  # <- NOT in the request-side Literal
             "band": "red",
             "nli_aggregate": 0.9986921121308114,
             "context_coverage_ratio": 1,

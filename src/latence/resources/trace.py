@@ -51,8 +51,8 @@ from .._models import (
     SupportUnitInput,
     TraceCodeResponse,
     TraceRagResponse,
-    TraceRollupResponse,
     TraceResponse,
+    TraceRollupResponse,
 )
 from ._base import AsyncResource, SyncResource
 
@@ -117,8 +117,7 @@ def _require_premise_lane(
     """
     if not (raw_context or chunk_ids or support_units):
         raise ValueError(
-            "Trace scoring requires at least one of: raw_context, "
-            "chunk_ids, or support_units."
+            "Trace scoring requires at least one of: raw_context, chunk_ids, or support_units."
         )
 
 
@@ -285,8 +284,9 @@ class Trace(SyncResource):
 
         response = self._client.post("/api/v1/trace/rag", json=body)
 
+        result: TraceRagResponse | JobSubmittedResponse
         if return_job:
-            result: Any = JobSubmittedResponse.model_validate(response.data)
+            result = JobSubmittedResponse.model_validate(response.data)
         else:
             result = TraceRagResponse.model_validate(response.data)
 
@@ -441,8 +441,9 @@ class Trace(SyncResource):
 
         response = self._client.post("/api/v1/trace/code", json=body)
 
+        result: TraceCodeResponse | JobSubmittedResponse
         if return_job:
-            result: Any = JobSubmittedResponse.model_validate(response.data)
+            result = JobSubmittedResponse.model_validate(response.data)
         else:
             result = TraceCodeResponse.model_validate(response.data)
 
@@ -622,8 +623,9 @@ class AsyncTrace(AsyncResource):
 
         response = await self._client.post("/api/v1/trace/rag", json=body)
 
+        result: TraceRagResponse | JobSubmittedResponse
         if return_job:
-            result: Any = JobSubmittedResponse.model_validate(response.data)
+            result = JobSubmittedResponse.model_validate(response.data)
         else:
             result = TraceRagResponse.model_validate(response.data)
 
@@ -772,8 +774,9 @@ class AsyncTrace(AsyncResource):
 
         response = await self._client.post("/api/v1/trace/code", json=body)
 
+        result: TraceCodeResponse | JobSubmittedResponse
         if return_job:
-            result: Any = JobSubmittedResponse.model_validate(response.data)
+            result = JobSubmittedResponse.model_validate(response.data)
         else:
             result = TraceCodeResponse.model_validate(response.data)
 
