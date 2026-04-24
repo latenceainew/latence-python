@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://latence.ai/logo.svg" alt="Latence AI" width="200">
+  <img src="https://www.latence.ai/icon.svg" alt="Latence AI" width="120">
 </p>
 
 <h1 align="center">Latence AI Python SDK</h1>
