@@ -5,8 +5,8 @@
 <h1 align="center">Latence AI Python SDK</h1>
 
 <p align="center">
-  <strong>Documents in. Intelligence out.</strong><br>
-  Turn unstructured documents into structured knowledge graphs, entities, and RAG-ready data -- in a single pipeline call.
+  <strong>Catch hallucinations, drift, and unused context &mdash; before your users do.</strong><br>
+  Groundedness scoring for RAG pipelines and AI coding agents, with a one-call path to upgrade data quality and retrieval when the scores tell you to.
 </p>
 
 <p align="center">
@@ -16,445 +16,222 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> &bull;
-  <a href="#the-pipeline">The Pipeline</a> &bull;
-  <a href="#the-data-package">The Data Package</a> &bull;
-  <a href="#pipeline-builder">Builder API</a> &bull;
-  <a href="#direct-api-access">Direct API</a> &bull;
-  <a href="#dataset-intelligence">Dataset Intelligence</a> &bull;
+  <a href="#quickstart">Quickstart</a> &bull;
+  <a href="#act-1--trace-your-answers">Trace</a> &bull;
+  <a href="#act-2--upgrade-data-quality">Upgrade Data Quality</a> &bull;
+  <a href="#act-3--upgrade-retrieval">Upgrade Retrieval</a> &bull;
+  <a href="docs/trace.md">Trace Reference</a> &bull;
   <a href="SDK_TUTORIAL.md">Full Tutorial</a>
 </p>
 
 ---
 
-## Quick Start
+## Quickstart
 
 ```bash
 pip install latence
+export LATENCE_API_KEY="lat_..."
 ```
 
 ```python
 from latence import Latence
 
-client = Latence()  # reads LATENCE_API_KEY from environment
+client = Latence()  # reads LATENCE_API_KEY from the environment
 
-job = client.pipeline.run(files=["contract.pdf"])
-pkg = job.wait_for_completion()
-
-print(pkg.document.markdown)                        # clean extracted text
-print(pkg.entities.summary)                         # {"total": 142, "by_type": {"PERSON": 23, ...}}
-print(pkg.knowledge_graph.summary.total_relations)  # 87
-pkg.download_archive("./results.zip")               # organized ZIP with everything
+r = client.experimental.trace.rag(
+    response_text="Paris is the capital of France.",
+    raw_context="France's capital city is Paris.",
+)
+print(r.score, r.band, r.context_coverage_ratio, r.context_unused_ratio)
 ```
 
-That's it. Four lines from PDF to structured knowledge.
+That's it. You now know whether the answer was grounded, how much of your retrieved context was actually used, and whether to trust it.
 
 ---
 
-## The Pipeline
+## Act 1 &mdash; Trace your answers
 
-The Latence AI **Data Intelligence Pipeline** chains multiple AI services into a single async job. You submit documents, configure which services to run, and get back a structured `DataPackage` with everything organized and summarized.
+Three lanes, one mental model. Pick the one that matches what your app is doing right now.
 
-### How it works
-
-The pipeline executes services as a **directed acyclic graph (DAG)**, not a linear chain. Independent branches run in parallel:
-
-```
-                    ┌─── extraction ──── relation_extraction
-                    │
-document_intelligence ─┼─── redaction
-                    │
-                    └─── compression
-```
-
-You declare which services you want. The pipeline handles ordering, dependencies, and parallel execution automatically.
-
-### Smart defaults
-
-Provide only files -- the pipeline auto-applies: **OCR -> Entity Extraction -> Relation Extraction**
+### RAG groundedness &mdash; did the answer actually come from your context?
 
 ```python
-job = client.pipeline.run(files=["report.pdf"])
+from latence import Latence
+
+client = Latence()
+
+r = client.experimental.trace.rag(
+    response_text="Paris is the capital of France.",
+    raw_context="France's capital city is Paris.",
+)
+
+print(r.score)                   # 0.0 - 1.0
+print(r.band)                    # "green" | "amber" | "red" | "unknown"
+print(r.context_coverage_ratio)  # how much of the answer is grounded in context
+print(r.context_unused_ratio)    # how much retrieved context was dead weight
 ```
 
-### Explicit steps
+**$0.008 per request**, quantized per 32k context tokens.
 
-Configure each service individually:
+### Code agents &mdash; catch phantom APIs and drift turn-over-turn
+
+Chain turns with the opaque `next_session_state` handoff. The SDK never forces you to track session internals.
 
 ```python
-job = client.pipeline.run(
-    files=["contract.pdf"],
-    name="Legal Analysis",
-    steps={
-        "ocr": {"mode": "performance", "output_format": "markdown"},
-        "redaction": {"mode": "balanced", "redact": True, "redaction_mode": "mask"},
-        "extraction": {
-            "label_mode": "hybrid",
-            "user_labels": ["person", "organization", "date", "monetary_amount"],
-            "threshold": 0.3,
-        },
-        "relation_extraction": {"resolve_entities": True, "optimize_relations": True},
-        "compression": {"compression_rate": 0.5},
-    },
+turn1 = client.experimental.trace.code(
+    response_text="def add(a, b): return a + b",
+    raw_context="# utils.py\ndef sub(a, b): return a - b",
+    response_language_hint="python",
 )
-pkg = job.wait_for_completion()
+
+turn2 = client.experimental.trace.code(
+    response_text="def mul(a, b): return a * b",
+    raw_context="# utils.py\ndef sub(a, b): return a - b",
+    response_language_hint="python",
+    session_state=turn1.next_session_state,   # chain turns
+)
+
+print(turn2.band)
+print(turn2.session_signals.recommendation)   # "continue" | "re_anchor" | "fresh_chat"
 ```
 
-### Available pipeline services
+**$2.00 per 1M aggregate tokens** (counted across `response_text`, `raw_context`, `query_text`, and `support_units`).
 
-| Step | Aliases | What it does |
-|------|---------|-------------|
-| `document_intelligence` | `ocr`, `doc_intel` | OCR, layout detection, markdown extraction |
-| `extraction` | `extract` | Zero-shot named entity recognition |
-| `relation_extraction` | `ontology`, `knowledge_graph`, `graph` | Relation extraction, knowledge graph construction |
-| `redaction` | `redact` | PII detection, masking, or synthetic replacement |
-| `compression` | `compress` | Intelligent token-level text compression |
+### Session rollup &mdash; one scoreboard for a live session
 
-Steps are automatically sorted into the correct DAG execution order.
-
-### From text or entities
-
-Pipelines don't require files. You can start from raw text or pre-extracted entities:
+Stateless, CPU-only, sub-ms on the pod. Safe to call on every keystroke.
 
 ```python
-# Text input (skips OCR automatically)
-job = client.pipeline.run(
-    text="Apple Inc. was founded by Steve Jobs in Cupertino, California.",
-    steps={"extraction": {"label_mode": "generated"}},
-)
+rollup = client.experimental.trace.rollup(turns=[turn1, turn2])
 
-# Entity input (relation extraction only)
-job = client.pipeline.run(
-    entities=[{"text": "Apple", "label": "ORG", "start": 0, "end": 5, "score": 0.98}],
-    steps={"knowledge_graph": {"resolve_entities": True}},
-)
+print(rollup.noise_pct)              # fraction of turns flagged as noise
+print(rollup.retrieval_waste_pct)    # fraction of retrieved context left unused
+print(rollup.model_drift_pct)        # fraction of turns with drift
+print(rollup.reason_code_histogram)  # why the turns failed, aggregated
+print(rollup.risk_band_trail)        # per-turn band, chronological
+print(rollup.recommendations)        # actionable session-level advice
 ```
 
-### Async / await
+**$0.001 flat per request.**
+
+### What the signals tell you to do next
+
+The numbers above are not diagnostics. They are routing rules:
+
+| Signal | Meaning | Next step |
+|---|---|---|
+| `band` amber/red, low `context_coverage_ratio` | The answer isn't grounded in what you retrieved. | **[Upgrade data quality](#act-2--upgrade-data-quality)** &mdash; your upstream documents are the bottleneck. |
+| High `context_unused_ratio`, `retrieval_waste_pct > 30%` | You retrieved the wrong chunks. | **[Upgrade retrieval](#act-3--upgrade-retrieval)** &mdash; your retriever is the bottleneck. |
+| `session_signals.recommendation = "re_anchor"` / `"fresh_chat"` on the code lane | Session drift is compounding. | Reset the agent's context on the next turn. |
+
+Full reference: [Trace docs](docs/trace.md) and [SDK tutorial &sect;18](SDK_TUTORIAL.md#18-direct-api-trace-groundedness--phantom-scoring).
+
+### Async
+
+Every method above has an `await`-able twin under `AsyncLatence`:
 
 ```python
 from latence import AsyncLatence
 
 async with AsyncLatence() as client:
-    job = await client.pipeline.run(files=["doc.pdf"])
-    pkg = await job.wait_for_completion()
-```
-
----
-
-## The Data Package
-
-Every pipeline returns a `DataPackage` -- structured, summarized, and ready for downstream use.
-
-| Section | What's inside | When present |
-|---------|-------------|--------------|
-| `pkg.document` | Markdown text, per-page content, metadata | OCR ran |
-| `pkg.entities` | Entity list, summary (total, by_type, avg_confidence) | Extraction ran |
-| `pkg.knowledge_graph` | Entities, relations, graph summary | Relation Extraction ran |
-| `pkg.redaction` | Cleaned text, PII list, summary | Redaction ran |
-| `pkg.compression` | Compressed text, ratio, tokens saved | Compression ran |
-| `pkg.quality` | Per-stage report, confidence scores, cost | Always |
-
-### Explore results
-
-```python
-pkg = job.wait_for_completion()
-
-# Document
-print(pkg.document.markdown)
-print(pkg.document.metadata.pages_processed)
-
-# Entities
-print(pkg.entities.summary.total)           # 142
-print(pkg.entities.summary.by_type)         # {"PERSON": 23, "ORG": 18, ...}
-print(pkg.entities.summary.avg_confidence)  # 0.87
-for e in pkg.entities.items:
-    print(f"  {e.text} [{e.label}] {e.score:.2f}")
-
-# Knowledge graph
-print(pkg.knowledge_graph.summary.total_relations)
-for r in pkg.knowledge_graph.relations:
-    print(f"  {r.entity1} --[{r.relation_type}]--> {r.entity2}")
-
-# Quality & cost
-print(f"Cost: ${pkg.quality.total_cost_usd:.4f}")
-print(f"Time: {pkg.quality.total_processing_time_ms:.0f}ms")
-```
-
-### Export
-
-```python
-# Organized ZIP archive
-pkg.download_archive("./results.zip")
-# -> Legal_Analysis/
-#      README.md, document.md, entities.json, knowledge_graph.json,
-#      quality_report.json, metadata.json, pages/page_001.md, ...
-
-# Single consolidated JSON (document-centric, zero redundancy)
-merged = pkg.merge(save_to="./results.json")
-```
-
----
-
-## Pipeline Builder
-
-For power users who want a typed, chainable API with client-side validation:
-
-```python
-from latence import PipelineBuilder
-
-config = (
-    PipelineBuilder()
-    .doc_intel(mode="performance")
-    .extraction(
-        label_mode="hybrid",
-        user_labels=["person", "organization", "date"],
-        threshold=0.3,
+    r = await client.experimental.trace.rag(
+        response_text="Paris is the capital of France.",
+        raw_context="France's capital city is Paris.",
     )
-    .relation_extraction(resolve_entities=True, optimize_relations=True)
-    .compression(compression_rate=0.5)
-    .store_intermediate()
-    .build()
-)
+```
 
-job = client.pipeline.submit(config, files=["contract.pdf"])
+---
+
+## Act 2 &mdash; Upgrade data quality
+
+Trace is showing low coverage or amber/red bands? The model is rarely the problem. It's usually the upstream data: un-OCR'd PDFs, missing entities, unresolved references. The Latence **Data Intelligence Pipeline** cleans that in one call.
+
+```python
+job = client.pipeline.run(files=["contract.pdf"])
 pkg = job.wait_for_completion()
+
+print(pkg.document.markdown)                         # clean markdown
+print(pkg.entities.summary)                          # {"total": 142, "by_type": {...}}
+print(pkg.knowledge_graph.summary.total_relations)   # 87
+pkg.download_archive("./results.zip")
 ```
 
-The builder validates parameters client-side (threshold ranges, valid modes, valid dimensions) and rejects duplicates before the request leaves your machine.
-
-### YAML configuration
-
-Define pipelines in version-controlled YAML:
-
-```yaml
-# pipeline.yml
-steps:
-  document_intelligence:
-    mode: performance
-  extraction:
-    label_mode: hybrid
-    user_labels: [person, organization, date]
-  relation_extraction:
-    resolve_entities: true
-```
+Smart defaults: OCR &rarr; entity extraction &rarr; relation extraction. Configure any step explicitly:
 
 ```python
-config = PipelineBuilder.from_yaml("pipeline.yml")
-job = client.pipeline.submit(config, files=["contract.pdf"])
-```
-
-### Validate before running
-
-```python
-result = client.pipeline.validate(config, files=["doc.pdf"])
-print(result.valid)          # True
-print(result.auto_injected)  # ["document_intelligence"]
-print(result.warnings)       # []
-```
-
----
-
-## Job Lifecycle
-
-Pipelines are async jobs. You get a handle immediately and control the lifecycle.
-
-```python
-job = client.pipeline.run(files=["doc.pdf"])
-
-# Poll status
-status = job.status()
-print(f"{status.stages_completed}/{status.total_stages}: {status.current_service}")
-
-# Wait with progress callback
-pkg = job.wait_for_completion(
-    poll_interval=5.0,
-    timeout=1800.0,
-    on_progress=lambda status, elapsed: print(f"  {status} ({elapsed:.0f}s)"),
-)
-
-# Cancel
-job.cancel()
-```
-
-### Resumable pipelines
-
-If a pipeline fails partway through, completed stages are checkpointed:
-
-```python
-from latence import JobError
-
-try:
-    pkg = job.wait_for_completion()
-except JobError as e:
-    if e.is_resumable:
-        pkg = job.resume().wait_for_completion()  # continues from checkpoint
-    else:
-        raise
-```
-
-### Job statuses
-
-| Status | Meaning |
-|--------|---------|
-| `QUEUED` | Waiting to start |
-| `IN_PROGRESS` | Processing |
-| `COMPLETED` | Finished successfully |
-| `CACHED` / `PULLED` | Results from cache/storage |
-| `RESUMABLE` | Failed mid-pipeline; call `job.resume()` |
-| `FAILED` | Pipeline failed |
-| `CANCELLED` | Cancelled by user |
-
----
-
-## Direct API Access
-
-Every Latence AI service is also available individually via `client.experimental` -- full granular control, no pipeline overhead. This is expert / developer mode: you call exactly the service you need with exactly the parameters you want.
-
-**Document intelligence services:**
-
-```python
-# Document processing (OCR, layout, markdown)
-result = client.experimental.document_intelligence.process(file_path="doc.pdf")
-
-# Entity extraction
-result = client.experimental.extraction.extract(
-    text="Apple Inc. was founded by Steve Jobs in Cupertino.",
-    config={"label_mode": "generated"},
-)
-
-# Relation extraction / knowledge graph
-result = client.experimental.ontology.build_graph(text="...", entities=[...])
-
-# PII detection and redaction
-result = client.experimental.redaction.detect_pii(
-    text="John Smith, SSN 123-45-6789",
-    config={"mode": "balanced", "redact": True, "redaction_mode": "mask"},
-)
-
-# Text chunking (4 strategies: character, token, semantic, hybrid)
-result = client.experimental.chunking.chunk(text="...", strategy="hybrid", chunk_size=512)
-```
-
-**Embedding and retrieval services:**
-
-```python
-# Dense embeddings (256-1024d, Matryoshka)
-result = client.experimental.embed.dense(text="Hello world", dimension=512)
-
-# ColBERT token-level embeddings (late interaction retrieval)
-result = client.experimental.colbert.embed(text="Hello world")
-
-# ColPali vision-language page embeddings
-result = client.experimental.colpali.embed(file_path="page.png")
-```
-
-**Groundedness & phantom-hallucination scoring ([Trace](docs/trace.md)):**
-
-```python
-# RAG groundedness -- was the response actually supported by the context?
-r = client.experimental.trace.rag(
-    response_text="Paris is the capital of France.",
-    raw_context="France's capital city is Paris.",
-)
-print(r.score, r.band, r.context_coverage_ratio)
-
-# Agentic-code phantom scoring with cross-turn session chaining
-t1 = client.experimental.trace.code(
-    response_text="def add(a, b): return a + b",
-    raw_context="# utils.py\ndef sub(a, b): return a - b",
-    response_language_hint="python",
-)
-t2 = client.experimental.trace.code(
-    response_text="def mul(a, b): return a * b",
-    raw_context="# utils.py\ndef sub(a, b): return a - b",
-    response_language_hint="python",
-    session_state=t1.next_session_state,   # round-trip the opaque state
-)
-
-# Stateless session rollup -- noise / drift / waste / reason-code histogram
-rollup = client.experimental.trace.rollup(turns=[t1, t2])
-print(rollup.noise_pct, rollup.recommendations)
-```
-
-> For production document intelligence workloads, use `client.pipeline`. Pipelines provide structured data packages, quality metrics, resumability, and are covered by Enterprise SLAs.
->
-> The Direct API is open to all. We actively welcome feedback -- if something is missing or could work better, [let us know](https://github.com/latenceai/latence-python/issues).
-
-See [SDK_TUTORIAL.md](SDK_TUTORIAL.md) for complete documentation of every service and parameter.
-
----
-
-## Dataset Intelligence
-
-Turn pipeline outputs into corpus-level knowledge graphs, ontologies, and structured datasets with incremental ingestion. Feed the output of any Latence pipeline into Dataset Intelligence to extract entities, resolve duplicates, build knowledge graphs with RotatE link prediction, and induce ontological concepts.
-
-```python
-# Dataset Intelligence consumes pipeline stage outputs.
-# Use the portal's Dataset Intelligence UI to upload pipeline results,
-# or submit programmatically via the SDK:
-di = client.experimental.dataset_intelligence_service
-
-# Create a new dataset from pipeline output (dict with stage keys)
-job = di.run(input_data=pipeline_output, return_job=True)
-print(f"Job submitted: {job.job_id}")
-# Poll status at GET /api/v1/pipeline/{job.job_id}
-
-# Append new documents to an existing dataset
-delta = di.run(
-    input_data=new_pipeline_output,
-    dataset_id="ds_existing_id",  # appends to existing dataset
-    return_job=True,
+job = client.pipeline.run(
+    files=["contract.pdf"],
+    steps={
+        "ocr": {"mode": "performance"},
+        "redaction": {"mode": "balanced", "redact": True},
+        "extraction": {"label_mode": "hybrid", "threshold": 0.3},
+        "relation_extraction": {"resolve_entities": True},
+    },
 )
 ```
 
-Four processing tiers:
+Every run returns a structured `DataPackage`:
+
+- `pkg.document` &mdash; markdown + per-page layout (OCR)
+- `pkg.entities` &mdash; entity list + summary (extraction)
+- `pkg.knowledge_graph` &mdash; entities + relations + graph summary (relation extraction)
+- `pkg.redaction` &mdash; cleaned text + PII list (redaction)
+- `pkg.compression` &mdash; compressed text + ratio (compression)
+- `pkg.quality` &mdash; per-stage confidence, latency, cost
+
+Power users: the typed [`PipelineBuilder`](SDK_TUTORIAL.md#4-pipeline-fluent-builder) accepts YAML and validates client-side. See [docs/pipelines.md](docs/pipelines.md) for the full orchestration reference (DAG execution, resumable jobs, progress callbacks).
+
+### Corpus-level: Dataset Intelligence
+
+Feed pipeline outputs into `client.experimental.dataset_intelligence_service` to build corpus-wide knowledge graphs, ontologies, and enriched feature spaces with incremental ingestion:
 
 | Tier | Method | What it does |
 |------|--------|-------------|
-| Tier 1 | `di.enrich()` | Semantic feature vectors (CPU-only, fast) |
-| Tier 2 | `di.build_graph()` | Entity resolution, knowledge graph, link prediction |
-| Tier 3 | `di.build_ontology()` | Concept clustering, hierarchy induction |
-| Full | `di.run()` | All 3 tiers sequentially |
+| 1 | `di.enrich()` | Semantic feature vectors (CPU-only, fast) |
+| 2 | `di.build_graph()` | Entity resolution, knowledge graph, link prediction |
+| 3 | `di.build_ontology()` | Concept clustering, hierarchy induction |
+| Full | `di.run()` | All three tiers sequentially |
 
-See [docs/dataset_intelligence.md](docs/dataset_intelligence.md) for the complete API reference, input format, delta ingestion details, and pricing.
+See [docs/dataset_intelligence.md](docs/dataset_intelligence.md).
 
 ---
 
-## Error Handling
+## Act 3 &mdash; Upgrade retrieval
+
+If Trace keeps flagging a high `context_unused_ratio`, or the session rollup shows `retrieval_waste_pct > 30%`, your model isn't the problem &mdash; **your retrieval engine is shipping the wrong chunks**.
+
+&rarr; **[ColSearch &mdash; High Performance Late Interaction and multimodal search engine](https://github.com/ddickmann/colsearch)**
+
+ColSearch is our late-interaction retrieval engine: token-level ColBERT recall, native multimodal search over PDFs and images, and a drop-in replacement for the retrieval step in your RAG stack. Wire it in and `context_unused_ratio` collapses.
+
+---
+
+## Error handling
 
 ```python
 from latence import (
-    LatenceError,           # base for all SDK errors
-    AuthenticationError,    # 401
-    InsufficientCreditsError,  # 402
-    RateLimitError,         # 429 (has retry_after)
-    JobError,               # pipeline failed (has job_id, is_resumable)
-    JobTimeoutError,        # wait exceeded timeout
-    TransportError,         # network / DNS / connection errors
+    LatenceError, AuthenticationError, InsufficientCreditsError,
+    RateLimitError, JobError, JobTimeoutError, TransportError,
 )
 
 try:
-    job = client.pipeline.run(files=["doc.pdf"])
-    pkg = job.wait_for_completion(timeout=600)
+    r = client.experimental.trace.rag(
+        response_text="Paris is the capital of France.",
+        raw_context="France's capital city is Paris.",
+    )
 except AuthenticationError:
-    print("Invalid API key")
+    ...  # 401
 except InsufficientCreditsError:
-    print("No credits remaining")
+    ...  # 402
 except RateLimitError as e:
-    print(f"Rate limited -- retry after {e.retry_after}s")
-except JobTimeoutError as e:
-    print(f"Pipeline {e.job_id} did not finish in time")
+    ...  # 429, retry after e.retry_after
 except JobError as e:
-    if e.is_resumable:
-        print(f"Resumable failure at {e.error_code}")
-    else:
-        print(f"Pipeline failed: {e.message}")
+    ...  # pipeline job failed; check e.is_resumable
 except TransportError:
-    print("Network error")
+    ...  # network / DNS
 ```
 
-The SDK automatically retries on 429, 5xx with exponential backoff and jitter (default: 2 retries, respects `Retry-After`).
+The SDK retries on 429 and 5xx with exponential backoff (default 2 retries, respects `Retry-After`).
 
 ---
 
@@ -465,19 +242,17 @@ export LATENCE_API_KEY="lat_your_key"
 ```
 
 ```python
+from latence import Latence
+import latence
+
 client = Latence(
     api_key="lat_...",       # or LATENCE_API_KEY env var
     base_url="https://...",  # or LATENCE_BASE_URL env var
     timeout=60.0,            # request timeout (default: 60s)
     max_retries=2,           # retry attempts (default: 2)
 )
-```
 
-### Debug logging
-
-```python
-import latence
-latence.setup_logging("DEBUG")  # logs all HTTP requests and responses
+latence.setup_logging("DEBUG")  # logs every HTTP request/response
 ```
 
 ---
@@ -486,8 +261,9 @@ latence.setup_logging("DEBUG")  # logs all HTTP requests and responses
 
 | | |
 |---|---|
-| **Full Tutorial** | [SDK_TUTORIAL.md](SDK_TUTORIAL.md) -- every feature, every parameter |
-| **API Reference** | [docs.latence.ai](https://docs.latence.ai) |
+| **Trace reference** | [docs/trace.md](docs/trace.md) &mdash; parameters, pricing, full response schema |
+| **Full tutorial** | [SDK_TUTORIAL.md](SDK_TUTORIAL.md) &mdash; every service, every parameter |
+| **API docs** | [docs.latence.ai](https://docs.latence.ai) |
 | **Portal** | [app.latence.ai](https://app.latence.ai) |
 
 ---

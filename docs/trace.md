@@ -35,6 +35,21 @@ print(rollup.noise_pct, rollup.recommendations)
 > production pipelines that orchestrate multiple services, use
 > [`client.pipeline`](pipelines.md).
 
+## Which lane should I use?
+
+- **`rag()`** &mdash; you have a retrieval-augmented answer (response + the
+  context you retrieved) and want to know whether the model actually used
+  the context or hallucinated. Returns a single score, a risk band, and
+  per-context-chunk coverage.
+- **`code()`** &mdash; your agent is generating or editing code across
+  multiple turns. Detects phantom APIs (functions/classes that don't exist
+  in the provided context) and drift over turns via the opaque
+  `next_session_state` handoff.
+- **`rollup()`** &mdash; you already have N per-turn outputs from `rag()`
+  or `code()` and want a single session scoreboard (`noise_pct`,
+  `retrieval_waste_pct`, reason-code histogram, risk trail). Stateless,
+  sub-ms, safe on every keystroke.
+
 ## Methods
 
 ### `client.experimental.trace.rag()`
@@ -70,6 +85,11 @@ supplied — the SDK enforces this client-side before the HTTP round-trip.
 **Pricing:** $0.008 per request, quantized per 32,000 context tokens
 (a 64k-token context counts as 2 requests).
 
+**Client-side validation (before HTTP):**
+
+- `ValueError("`response_text` must be a non-empty string.")` &mdash; raised when `response_text` is empty or whitespace-only.
+- `ValueError("Trace scoring requires at least one of: raw_context, chunk_ids, or support_units.")` &mdash; raised when no premise lane is supplied.
+
 ### `client.experimental.trace.code()`
 
 Superset of `rag()`, plus three code-lane-only fields:
@@ -83,6 +103,8 @@ Superset of `rag()`, plus three code-lane-only fields:
 **Pricing:** $2.00 per 1,000,000 aggregate tokens (counted from
 `response_text` + `raw_context` + `query_text` + `support_units` with
 `tiktoken`).
+
+**Client-side validation (before HTTP):** same as `rag()` above &mdash; `response_text` must be non-empty and at least one premise lane (`raw_context`, `chunk_ids`, or `support_units`) must be supplied.
 
 ### `client.experimental.trace.rollup()`
 
@@ -98,6 +120,10 @@ CPU-only, sub-ms on the pod. Safe to call on every keystroke.
 
 **Pricing:** $0.001 flat per request.
 
+**Client-side validation (before HTTP):**
+
+- `ValueError("`turns` must be a non-empty list.")` &mdash; raised when `turns` is empty.
+
 ## Responses
 
 ### `TraceRagResponse` / `TraceCodeResponse`
@@ -107,7 +133,7 @@ Shared fields (both lanes):
 | Field | Type | Description |
 |-------|------|-------------|
 | `score` | `float \| None` | Top-level groundedness score (0–1). |
-| `primary_metric` | `"reverse_context" \| "triangular" \| None` | Metric backing `score`. |
+| `primary_metric` | `str \| None` | Metric backing `score`. Typically `"reverse_context"` or `"triangular"`, but the pod may echo a derived name (e.g. `"groundedness_v2"`); do not pin this to an enum on the response side. |
 | `band` | `str \| None` | Risk band (`green` / `amber` / `red` / `unknown`). |
 | `structured_score` | `dict \| None` | Per-component score breakdown. |
 | `nli_aggregate` | `float \| None` | Aggregate NLI entailment score. |

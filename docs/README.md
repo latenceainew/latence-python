@@ -29,6 +29,7 @@ Individual services are available under `client.experimental.*` for fine-grained
 
 | Service | Description | Guide |
 |---------|-------------|-------|
+| **Trace** | Groundedness + phantom-hallucination scoring (RAG / code / session rollup) | [trace.md](trace.md) |
 | **Embed** (Unified) | Dense, token-level, and visual embeddings in one API | [embed.md](embed.md) |
 | **Compression** | Text and chat message compression (up to 80%) | [compression.md](compression.md) |
 | **Document Intelligence** | OCR and structure extraction from PDFs, images, Office docs | [document_intelligence.md](document_intelligence.md) |
@@ -36,7 +37,6 @@ Individual services are available under `client.experimental.*` for fine-grained
 | **Relation Extraction** | Relation extraction and knowledge graph construction | [ontology.md](ontology.md) |
 | **Redaction** | PII detection and GDPR-compliant redaction | [redaction.md](redaction.md) |
 | **Dataset Intelligence** | Corpus-level KG, ontology, incremental ingestion | [dataset_intelligence.md](dataset_intelligence.md) |
-| **Trace** | Groundedness + phantom-hallucination scoring (RAG / code / session rollup) | [trace.md](trace.md) |
 
 ### Quick Navigation
 
