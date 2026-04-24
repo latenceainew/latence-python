@@ -123,6 +123,13 @@ from ._models import (
     ServiceConfig,
     StageDownload,
     StageStatus,
+    # Trace
+    SessionState,
+    SupportUnitInput,
+    TraceCodeResponse,
+    TraceRagResponse,
+    TraceResponse,
+    TraceRollupResponse,
     UnifiedEmbedResponse,
     Usage,
 )
@@ -196,4 +203,11 @@ __all__ = [
     "ServiceConfig",
     "StageDownload",
     "StageStatus",
+    # Trace
+    "SessionState",
+    "SupportUnitInput",
+    "TraceCodeResponse",
+    "TraceRagResponse",
+    "TraceResponse",
+    "TraceRollupResponse",
 ]

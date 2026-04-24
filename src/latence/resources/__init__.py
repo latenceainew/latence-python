@@ -21,6 +21,7 @@ from .jobs import AsyncJobs, Jobs
 from .ontology import AsyncOntology, Ontology
 from .pipeline import AsyncPipeline, Pipeline
 from .redaction import AsyncRedaction, Redaction
+from .trace import AsyncTrace, Trace
 
 __all__ = [
     # Sync resources
@@ -39,6 +40,7 @@ __all__ = [
     "Ontology",
     "Pipeline",
     "Redaction",
+    "Trace",
     "ExperimentalNamespace",
     # Async resources
     "AsyncChunking",
@@ -56,5 +58,6 @@ __all__ = [
     "AsyncOntology",
     "AsyncPipeline",
     "AsyncRedaction",
+    "AsyncTrace",
     "AsyncExperimentalNamespace",
 ]

@@ -73,6 +73,26 @@ from .pipeline import (
     StageStatus,
 )
 from .redaction import DetectPIIResponse, RedactionConfig
+from .trace import (
+    AttributionMode,
+    CodeLaneDiagnostics,
+    FileAttribution,
+    Heatmap,
+    HeatmapFormat,
+    PrimaryMetric,
+    ResponseLanguageHint,
+    ScoringMode,
+    SegmentationMode,
+    SessionSignals,
+    SessionState,
+    SupportUnitInput,
+    SupportUnitUsage,
+    SupportUnitsUsageSummary,
+    TraceCodeResponse,
+    TraceRagResponse,
+    TraceResponse,
+    TraceRollupResponse,
+)
 
 __all__ = [
     # Common
@@ -136,6 +156,25 @@ __all__ = [
     # Redaction
     "DetectPIIResponse",
     "RedactionConfig",
+    # Trace
+    "AttributionMode",
+    "CodeLaneDiagnostics",
+    "FileAttribution",
+    "Heatmap",
+    "HeatmapFormat",
+    "PrimaryMetric",
+    "ResponseLanguageHint",
+    "ScoringMode",
+    "SegmentationMode",
+    "SessionSignals",
+    "SessionState",
+    "SupportUnitInput",
+    "SupportUnitUsage",
+    "SupportUnitsUsageSummary",
+    "TraceCodeResponse",
+    "TraceRagResponse",
+    "TraceResponse",
+    "TraceRollupResponse",
     # Dataset Intelligence
     "DatasetIntelligenceDeltaSummary",
     "DatasetIntelligenceResponse",

@@ -25,12 +25,13 @@ This tutorial covers every feature of the Latence AI Python SDK: the **Data Inte
 15. [Direct API: Enrichment](#15-direct-api-enrichment)
 16. [Direct API: Embeddings (Unified)](#16-direct-api-embeddings-unified)
 17. [Direct API: Legacy Embeddings](#17-direct-api-legacy-embeddings)
-18. [Jobs Service](#18-jobs-service)
-19. [Credits](#19-credits)
-20. [Async Usage](#20-async-usage)
-21. [File Handling](#21-file-handling)
-22. [Error Handling](#22-error-handling)
-23. [Configuration](#23-configuration)
+18. [Direct API: Trace (Groundedness & Phantom Scoring)](#18-direct-api-trace-groundedness--phantom-scoring)
+19. [Jobs Service](#19-jobs-service)
+20. [Credits](#20-credits)
+21. [Async Usage](#21-async-usage)
+22. [File Handling](#22-file-handling)
+23. [Error Handling](#23-error-handling)
+24. [Configuration](#24-configuration)
 
 ---
 
@@ -1357,7 +1358,144 @@ result = client.experimental.colpali.embed(image="base64_string...", is_query=Fa
 
 ---
 
-## 18. Jobs Service
+## 18. Direct API: Trace (Groundedness & Phantom Scoring)
+
+Score LLM outputs against their retrieval context (RAG lane), against code
+context (agentic-code lane), or aggregate per-turn outputs into a session
+scoreboard (rollup lane). All three live under `client.experimental.trace`
+and share one underlying pod — the lane is pinned server-side by URL.
+
+```python
+trace = client.experimental.trace
+```
+
+See [docs/trace.md](docs/trace.md) for the full reference.
+
+### RAG groundedness
+
+`rag()` scores a response against retrieval context. At least one of
+`raw_context`, `chunk_ids`, or `support_units` must be provided (the SDK
+enforces this client-side).
+
+```python
+r = trace.rag(
+    response_text="Paris is the capital of France.",
+    raw_context="France's capital city is Paris. Population: 2.1M.",
+    query_text="What is the capital of France?",
+    primary_metric="reverse_context",   # or "triangular"
+    evidence_limit=8,                   # top evidence links in the sparse response
+    coverage_threshold=0.5,             # per-unit coverage threshold
+    heatmap_format="data",              # "none" | "data" | "html"
+)
+
+print(r.score, r.band)                   # 0.87 "green"
+print(r.context_coverage_ratio)          # 0.92
+print(r.context_usage_ratio)             # 0.75
+print(r.support_units_usage)             # SupportUnitsUsageSummary(used=3, unused=1, ...)
+```
+
+**Pricing:** $0.008 per request, quantized per 32,000 context tokens.
+
+### Structured premises with `SupportUnitInput`
+
+Use `support_units` when you want per-unit provenance (speaker, timestamp,
+source id) propagated into the response.
+
+```python
+from latence import SupportUnitInput
+
+units = [
+    SupportUnitInput(text="Paris is the capital of France.", source_id="doc-42"),
+    SupportUnitInput(text="It is located on the Seine.",    source_id="doc-42"),
+    {"text": "Population: 2.1M.", "source_id": "wiki"},    # plain dicts work too
+]
+
+r = trace.rag(
+    response_text="Paris, France's capital, sits on the Seine.",
+    support_units=units,
+)
+
+for unit in (r.support_units or []):
+    print(unit.source_id, unit.usage_state, unit.coverage_score)
+```
+
+### Agentic-code phantom scoring
+
+`code()` is a superset of `rag()` with three extra knobs:
+
+- `response_language_hint` — hints the AST extractor (`python`, `ts`, `go`, `rust`, …)
+- `emit_chunk_ownership` — include a per-unit ownership table in the response
+- `session_state` — the previous turn's opaque state, for cross-turn chaining
+
+```python
+t1 = trace.code(
+    response_text="def add(a, b): return a + b",
+    raw_context="# utils.py\ndef sub(a, b): return a - b",
+    response_language_hint="python",
+)
+print(t1.band, t1.code_lane, t1.session_signals.recommendation)
+
+# Chain turn 2 by round-tripping the opaque next_session_state:
+t2 = trace.code(
+    response_text="def mul(a, b): return a * b",
+    raw_context="# utils.py\ndef sub(a, b): return a - b",
+    response_language_hint="python",
+    session_state=t1.next_session_state,
+)
+print(t2.session_signals.ema_groundedness)
+print(t2.session_signals.recommendation)   # "continue" / "re_anchor" / "fresh_chat"
+```
+
+**Pricing:** $2.00 per 1,000,000 aggregate tokens (counted with `tiktoken`
+across `response_text` + `raw_context` + `query_text` + `support_units`).
+
+### Session rollup — live scoreboards
+
+`rollup()` is stateless, CPU-only, and sub-ms on the pod. Safe to call on
+every keystroke for live IDE scoreboards.
+
+```python
+# Pass live response objects OR plain dicts — they're normalized for you.
+rollup = trace.rollup(
+    turns=[t1, t2],
+    session_id="sess_abc",
+    heatmap_format="data",   # "none" | "data" | "html"
+)
+
+print(f"noise:     {rollup.noise_pct:.0%}")
+print(f"drift:     {rollup.model_drift_pct:.0%}")
+print(f"waste:     {rollup.retrieval_waste_pct:.0%}")
+print(f"reason codes: {rollup.reason_code_histogram}")
+print(f"risk trail:   {rollup.risk_band_trail}")
+print(f"recommend:    {rollup.recommendations}")
+```
+
+**Pricing:** $0.001 flat per request.
+
+### Client-side validation
+
+The SDK rejects invalid requests before the HTTP round-trip:
+
+- `response_text` must be a non-empty, non-whitespace string.
+- At least one of `raw_context`, `chunk_ids`, or `support_units` must be supplied.
+- `rollup(turns=[])` raises `ValueError`.
+
+### Background jobs
+
+Every scoring method accepts `return_job=True` to submit as a job:
+
+```python
+job = trace.rag(
+    response_text="Paris is the capital of France.",
+    raw_context="France's capital city is Paris.",
+    return_job=True,
+)
+result = client.jobs.wait(job.job_id)
+```
+
+---
+
+## 19. Jobs Service
 
 Manage background jobs across all services.
 
@@ -1419,7 +1557,7 @@ print(response.status)
 
 ---
 
-## 19. Credits
+## 20. Credits
 
 Check your credit balance.
 
@@ -1439,7 +1577,7 @@ print(f"Rate limit remaining: {result.rate_limit_remaining}")
 
 ---
 
-## 20. Async Usage
+## 21. Async Usage
 
 Every feature has an async equivalent using `AsyncLatence`.
 
@@ -1534,7 +1672,7 @@ report = await job.get_report()
 
 ---
 
-## 21. File Handling
+## 22. File Handling
 
 ### Local files (Path or string)
 
@@ -1604,7 +1742,7 @@ result = client.experimental.document_intelligence.process(file_base64=b64)
 
 ---
 
-## 22. Error Handling
+## 23. Error Handling
 
 The SDK provides a granular exception hierarchy.
 
@@ -1713,7 +1851,7 @@ The SDK automatically retries on transient errors:
 
 ---
 
-## 23. Configuration
+## 24. Configuration
 
 ### Client options
 

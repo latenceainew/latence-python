@@ -349,6 +349,34 @@ result = client.experimental.colbert.embed(text="Hello world")
 result = client.experimental.colpali.embed(file_path="page.png")
 ```
 
+**Groundedness & phantom-hallucination scoring ([Trace](docs/trace.md)):**
+
+```python
+# RAG groundedness -- was the response actually supported by the context?
+r = client.experimental.trace.rag(
+    response_text="Paris is the capital of France.",
+    raw_context="France's capital city is Paris.",
+)
+print(r.score, r.band, r.context_coverage_ratio)
+
+# Agentic-code phantom scoring with cross-turn session chaining
+t1 = client.experimental.trace.code(
+    response_text="def add(a, b): return a + b",
+    raw_context="# utils.py\ndef sub(a, b): return a - b",
+    response_language_hint="python",
+)
+t2 = client.experimental.trace.code(
+    response_text="def mul(a, b): return a * b",
+    raw_context="# utils.py\ndef sub(a, b): return a - b",
+    response_language_hint="python",
+    session_state=t1.next_session_state,   # round-trip the opaque state
+)
+
+# Stateless session rollup -- noise / drift / waste / reason-code histogram
+rollup = client.experimental.trace.rollup(turns=[t1, t2])
+print(rollup.noise_pct, rollup.recommendations)
+```
+
 > For production document intelligence workloads, use `client.pipeline`. Pipelines provide structured data packages, quality metrics, resumability, and are covered by Enterprise SLAs.
 >
 > The Direct API is open to all. We actively welcome feedback -- if something is missing or could work better, [let us know](https://github.com/latenceai/latence-python/issues).

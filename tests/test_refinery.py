@@ -813,6 +813,7 @@ class TestExperimentalNamespace:
         assert ns.extraction is not None
         assert ns.ontology is not None
         assert ns.redaction is not None
+        assert ns.trace is not None
 
 
 # =============================================================================

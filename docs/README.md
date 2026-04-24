@@ -36,6 +36,7 @@ Individual services are available under `client.experimental.*` for fine-grained
 | **Relation Extraction** | Relation extraction and knowledge graph construction | [ontology.md](ontology.md) |
 | **Redaction** | PII detection and GDPR-compliant redaction | [redaction.md](redaction.md) |
 | **Dataset Intelligence** | Corpus-level KG, ontology, incremental ingestion | [dataset_intelligence.md](dataset_intelligence.md) |
+| **Trace** | Groundedness + phantom-hallucination scoring (RAG / code / session rollup) | [trace.md](trace.md) |
 
 ### Quick Navigation
 
@@ -57,6 +58,9 @@ client.experimental.document_intelligence.process(...)          # OCR / document
 client.experimental.extraction.extract(...)                     # Entity extraction
 client.experimental.ontology.build_graph(...)                   # Knowledge graphs
 client.experimental.redaction.detect_pii(...)                   # PII detection & redaction
+client.experimental.trace.rag(...)                              # RAG groundedness scoring
+client.experimental.trace.code(...)                             # Agentic-code phantom scoring
+client.experimental.trace.rollup(turns=[...])                   # Session-level scoreboard
 
 # --- Dataset Intelligence (corpus-level) ---
 client.experimental.dataset_intelligence_service.run(...)        # Full DI pipeline

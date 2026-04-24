@@ -28,6 +28,7 @@ from .enrichment import AsyncEnrichment, Enrichment
 from .extraction import AsyncExtraction, Extraction
 from .ontology import AsyncOntology, Ontology
 from .redaction import AsyncRedaction, Redaction
+from .trace import AsyncTrace, Trace
 
 if TYPE_CHECKING:
     from .._base import BaseAsyncClient, BaseSyncClient
@@ -66,6 +67,7 @@ class ExperimentalNamespace:
         self._dataset_intelligence_service = DatasetIntelligenceService(client)
         self._ontology = Ontology(client)
         self._redaction = Redaction(client)
+        self._trace = Trace(client)
 
     def _log_once(self) -> None:
         if not self._warned:
@@ -148,6 +150,12 @@ class ExperimentalNamespace:
         self._log_once()
         return self._redaction
 
+    @property
+    def trace(self) -> Trace:
+        """Trace service — groundedness + phantom-hallucination scoring (RAG / code / rollup)."""
+        self._log_once()
+        return self._trace
+
 
 class AsyncExperimentalNamespace:
     """Async container for direct service resources.
@@ -172,6 +180,7 @@ class AsyncExperimentalNamespace:
         self._dataset_intelligence_service = AsyncDatasetIntelligenceService(client)
         self._ontology = AsyncOntology(client)
         self._redaction = AsyncRedaction(client)
+        self._trace = AsyncTrace(client)
 
     def _log_once(self) -> None:
         if not self._warned:
@@ -253,3 +262,9 @@ class AsyncExperimentalNamespace:
         """PII redaction service (async)."""
         self._log_once()
         return self._redaction
+
+    @property
+    def trace(self) -> AsyncTrace:
+        """Trace service (async) — groundedness + phantom-hallucination scoring."""
+        self._log_once()
+        return self._trace
