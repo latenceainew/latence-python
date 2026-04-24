@@ -954,8 +954,8 @@ class TestStageStatus:
 class TestVersion:
     """Tests for version bump."""
 
-    def test_version_is_0_1_1(self):
-        """Version should be 0.1.1."""
+    def test_version_is_0_1_2(self):
+        """Version should be 0.1.2."""
         import latence
 
-        assert latence.__version__ == "0.1.1"
+        assert latence.__version__ == "0.1.2"
