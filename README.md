@@ -5,8 +5,12 @@
 <h1 align="center">Latence AI Python SDK</h1>
 
 <p align="center">
-  <strong>Catch hallucinations, drift, and unused context &mdash; before your users do.</strong><br>
-  Groundedness scoring for RAG pipelines and AI coding agents, with a one-call path to upgrade data quality and retrieval when the scores tell you to.
+  <strong>Catch hallucinations, drift, and unused context before your users do.</strong><br>
+  Groundedness scoring for RAG pipelines and AI coding agents, with a one-call path to upgrade data quality &mdash; from messy input files to fully generated markdown and knowledge graphs &mdash; as well as a high-performance retrieval engine (OSS).
+</p>
+
+<p align="center">
+  <em>Charge your RAG pipelines and harnesses based on real data.</em>
 </p>
 
 <p align="center">
@@ -71,8 +75,6 @@ print(r.context_coverage_ratio)  # how much of the answer is grounded in context
 print(r.context_unused_ratio)    # how much retrieved context was dead weight
 ```
 
-**$0.008 per request**, quantized per 32k context tokens.
-
 ### Code agents &mdash; catch phantom APIs and drift turn-over-turn
 
 Chain turns with the opaque `next_session_state` handoff. The SDK never forces you to track session internals.
@@ -95,8 +97,6 @@ print(turn2.band)
 print(turn2.session_signals.recommendation)   # "continue" | "re_anchor" | "fresh_chat"
 ```
 
-**$2.00 per 1M aggregate tokens** (counted across `response_text`, `raw_context`, `query_text`, and `support_units`).
-
 ### Session rollup &mdash; one scoreboard for a live session
 
 Stateless, CPU-only, sub-ms on the pod. Safe to call on every keystroke.
@@ -111,8 +111,6 @@ print(rollup.reason_code_histogram)  # why the turns failed, aggregated
 print(rollup.risk_band_trail)        # per-turn band, chronological
 print(rollup.recommendations)        # actionable session-level advice
 ```
-
-**$0.001 flat per request.**
 
 ### What the signals tell you to do next
 
@@ -261,7 +259,7 @@ latence.setup_logging("DEBUG")  # logs every HTTP request/response
 
 | | |
 |---|---|
-| **Trace reference** | [docs/trace.md](docs/trace.md) &mdash; parameters, pricing, full response schema |
+| **Trace reference** | [docs/trace.md](docs/trace.md) &mdash; parameters and full response schema |
 | **Full tutorial** | [SDK_TUTORIAL.md](SDK_TUTORIAL.md) &mdash; every service, every parameter |
 | **API docs** | [docs.latence.ai](https://docs.latence.ai) |
 | **Portal** | [app.latence.ai](https://app.latence.ai) |
