@@ -29,21 +29,38 @@ from latence.resources.experimental import (
 )
 from latence.resources.trace import AsyncTrace, Trace
 
+
+def test_response_metadata_reads_gateway_cost_headers():
+    metadata = ResponseMetadata.from_headers(
+        {
+            "x-cost-usd": "0.008000000000",
+            "x-balance-remaining": "1.543",
+            "x-ratelimit-remaining": "599",
+            "x-request-id": "req_header",
+        }
+    )
+
+    assert metadata.cost_usd == pytest.approx(0.008)
+    assert metadata.balance_remaining == pytest.approx(1.543)
+    assert metadata.rate_limit_remaining == 599
+    assert metadata.request_id == "req_header"
+
 # ---------------------------------------------------------------------------
 # Fake clients (mirror tests/test_refinery.py)
 # ---------------------------------------------------------------------------
 
 
 class _FakeSyncClient:
-    def __init__(self, data: dict | None = None) -> None:
+    def __init__(self, data: dict | None = None, metadata: ResponseMetadata | None = None) -> None:
         self._data = data or {}
+        self._metadata = metadata or ResponseMetadata(request_id="req_test")
         self.calls: list[tuple[str, str, dict | None]] = []
 
     def post(self, path: str, json: dict | None = None) -> APIResponse:
         self.calls.append(("POST", path, json))
         return APIResponse(
             data=self._data,
-            metadata=ResponseMetadata(request_id="req_test"),
+            metadata=self._metadata,
             status_code=200,
         )
 
@@ -51,7 +68,7 @@ class _FakeSyncClient:
         self.calls.append(("GET", path, None))
         return APIResponse(
             data=self._data,
-            metadata=ResponseMetadata(request_id="req_test"),
+            metadata=self._metadata,
             status_code=200,
         )
 
@@ -60,15 +77,16 @@ class _FakeSyncClient:
 
 
 class _FakeAsyncClient:
-    def __init__(self, data: dict | None = None) -> None:
+    def __init__(self, data: dict | None = None, metadata: ResponseMetadata | None = None) -> None:
         self._data = data or {}
+        self._metadata = metadata or ResponseMetadata(request_id="req_test")
         self.calls: list[tuple[str, str, dict | None]] = []
 
     async def post(self, path: str, json: dict | None = None) -> APIResponse:
         self.calls.append(("POST", path, json))
         return APIResponse(
             data=self._data,
-            metadata=ResponseMetadata(request_id="req_test"),
+            metadata=self._metadata,
             status_code=200,
         )
 
@@ -76,7 +94,7 @@ class _FakeAsyncClient:
         self.calls.append(("GET", path, None))
         return APIResponse(
             data=self._data,
-            metadata=ResponseMetadata(request_id="req_test"),
+            metadata=self._metadata,
             status_code=200,
         )
 
@@ -625,6 +643,23 @@ class TestMetadataInjection:
         fake = _FakeSyncClient(data=_rag_response_fixture())
         r = Trace(fake).rag(response_text="answer", raw_context="context")
         assert r.request_id == "req_test"
+
+    def test_gateway_cost_headers_are_injected(self):
+        fake = _FakeSyncClient(
+            data=_rag_response_fixture(),
+            metadata=ResponseMetadata(
+                request_id="req_cost",
+                cost_usd=0.008,
+                balance_remaining=1.543,
+                rate_limit_remaining=599,
+            ),
+        )
+        r = Trace(fake).rag(response_text="answer", raw_context="context")
+
+        assert r.request_id == "req_cost"
+        assert r.cost_usd == pytest.approx(0.008)
+        assert r.balance_remaining == pytest.approx(1.543)
+        assert r.rate_limit_remaining == 599
 
 
 # ===========================================================================

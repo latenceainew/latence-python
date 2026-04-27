@@ -30,6 +30,10 @@ def _inject_response_metadata(model: T, response: APIResponse) -> T:
         model.credits_used = response.metadata.credits_used
     if hasattr(model, "credits_remaining"):
         model.credits_remaining = response.metadata.credits_remaining
+    if hasattr(model, "cost_usd"):
+        model.cost_usd = response.metadata.cost_usd
+    if hasattr(model, "balance_remaining"):
+        model.balance_remaining = response.metadata.balance_remaining
     if hasattr(model, "rate_limit_remaining"):
         model.rate_limit_remaining = response.metadata.rate_limit_remaining
     if hasattr(model, "request_id") and model.request_id is None:

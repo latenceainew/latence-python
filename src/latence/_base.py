@@ -26,6 +26,8 @@ class ResponseMetadata:
     __slots__ = (
         "credits_used",
         "credits_remaining",
+        "cost_usd",
+        "balance_remaining",
         "rate_limit_limit",
         "rate_limit_remaining",
         "retry_after",
@@ -37,6 +39,8 @@ class ResponseMetadata:
         *,
         credits_used: float | None = None,
         credits_remaining: float | None = None,
+        cost_usd: float | None = None,
+        balance_remaining: float | None = None,
         rate_limit_limit: int | None = None,
         rate_limit_remaining: int | None = None,
         retry_after: float | None = None,
@@ -44,6 +48,8 @@ class ResponseMetadata:
     ) -> None:
         self.credits_used = credits_used
         self.credits_remaining = credits_remaining
+        self.cost_usd = cost_usd
+        self.balance_remaining = balance_remaining
         self.rate_limit_limit = rate_limit_limit
         self.rate_limit_remaining = rate_limit_remaining
         self.retry_after = retry_after
@@ -72,6 +78,8 @@ class ResponseMetadata:
         return cls(
             credits_used=_float_or_none(headers.get("x-credits-used")),
             credits_remaining=_float_or_none(headers.get("x-credits-remaining")),
+            cost_usd=_float_or_none(headers.get("x-cost-usd")),
+            balance_remaining=_float_or_none(headers.get("x-balance-remaining")),
             rate_limit_limit=_int_or_none(headers.get("x-ratelimit-limit")),
             rate_limit_remaining=_int_or_none(headers.get("x-ratelimit-remaining")),
             retry_after=_float_or_none(headers.get("retry-after")),
