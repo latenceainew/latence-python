@@ -197,8 +197,8 @@ class TraceResponse(BaseResponse):
     band: str | None = Field(
         default=None, description="Risk band label (e.g. green/amber/red/unknown)."
     )
-    structured_score: dict[str, Any] | None = Field(
-        default=None, description="Per-component score breakdown."
+    structured_score: dict[str, Any] | float | None = Field(
+        default=None, description="Per-component score breakdown or scalar structured score."
     )
     nli_aggregate: float | None = Field(default=None, description="Aggregate NLI entailment score.")
     context_coverage_ratio: float | None = Field(

@@ -257,6 +257,12 @@ class TestModelParsing:
         r = TraceRagResponse.model_validate(payload)
         assert getattr(r, "future_field") == {"x": 1}
 
+    def test_scalar_structured_score_from_prod_parses(self):
+        """Production may emit ``structured_score`` as a scalar for simple text."""
+        payload = _rag_response_fixture() | {"structured_score": 1}
+        r = TraceRagResponse.model_validate(payload)
+        assert r.structured_score == 1
+
     def test_real_prod_rag_response_parses(self):
         """Regression: real production gateway returns primary_metric='groundedness_v2'.
 
