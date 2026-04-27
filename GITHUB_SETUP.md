@@ -5,7 +5,7 @@
 Go to https://github.com/new and create a new repository:
 
 - **Repository name**: `latence-python` (or `python-sdk`)
-- **Description**: Official Python SDK for Latence AI API Gateway
+- **Description**: Official Python SDK for Latence API Gateway
 - **Visibility**: ✅ **Private** (for now)
 - **Initialize**: ❌ Do NOT initialize with README, .gitignore, or license (we already have these)
 

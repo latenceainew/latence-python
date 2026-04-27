@@ -1,5 +1,5 @@
 """
-Shared test utilities for Latence AI SDK notebooks.
+Shared test utilities for Latence SDK notebooks.
 
 This module provides helpers for:
 - Client initialization
@@ -430,7 +430,7 @@ def setup_notebook(
         >>> # At the start of each notebook:
         >>> client = setup_notebook()
     """
-    print_section("Latence AI SDK - Notebook Setup")
+    print_section("Latence SDK - Notebook Setup")
     
     client = get_client(api_key=api_key)
     print_success(f"Client initialized (base_url: {client.base_url})")

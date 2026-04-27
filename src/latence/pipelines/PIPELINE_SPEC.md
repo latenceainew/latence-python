@@ -2,7 +2,7 @@
 
 ## Overview
 
-The pipeline module will provide predefined best-practice pipelines that chain Latence AI services together. This enables users to accomplish complex document processing workflows with minimal code while ensuring correct service ordering and data flow.
+The pipeline module will provide predefined best-practice pipelines that chain Latence services together. This enables users to accomplish complex document processing workflows with minimal code while ensuring correct service ordering and data flow.
 
 ## Design Principles
 

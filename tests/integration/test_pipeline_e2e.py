@@ -1,5 +1,5 @@
 """
-End-to-end pipeline tests for the Latence AI SDK.
+End-to-end pipeline tests for the Latence SDK.
 
 Comprehensive 360-degree validation covering:
   - Smart defaults, explicit steps, builder API, text-only input

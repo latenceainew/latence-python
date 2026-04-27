@@ -1,5 +1,5 @@
 """
-Latence AI Python SDK -- Data Intelligence Pipeline
+Latence Python SDK -- Data Intelligence Pipeline
 
 Turn messy documents into RAG-ready knowledge with a single call.
 The pipeline is async/job-based by default: submit files, get back a

@@ -42,7 +42,7 @@ from .resources.experimental import (
 
 class Latence:
     """
-    Synchronous client for the Latence AI API.
+    Synchronous client for the Latence API.
 
     The **primary interface** is ``client.pipeline`` -- an async/job-based
     Data Intelligence Pipeline.  Submit files, get a structured DataPackage
@@ -179,7 +179,7 @@ class Latence:
 
 class AsyncLatence:
     """
-    Asynchronous client for the Latence AI API.
+    Asynchronous client for the Latence API.
 
     Async equivalent of :class:`Latence`.  All pipeline and service
     methods are ``async/await``.

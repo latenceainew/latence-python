@@ -1,6 +1,6 @@
-# Contributing to Latence AI Python SDK
+# Contributing to Latence Python SDK
 
-Thank you for your interest in Latence AI.
+Thank you for your interest in Latence.
 
 At this stage, the SDK is maintained by a solo founder and **we are not accepting external contributions** (issues, pull requests, or feature requests via GitHub).
 

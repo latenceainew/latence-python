@@ -1,6 +1,6 @@
 """Pipeline service resource for multi-service pipeline execution.
 
-This is the primary interface for the Latence AI Data Intelligence Pipeline.
+This is the primary interface for the Latence Data Intelligence Pipeline.
 Pipelines are async/job-based by default: ``run()`` and ``submit()`` return
 a :class:`Job` handle immediately while data flows from service to service
 on the backend.
@@ -209,7 +209,7 @@ def _parse_pipeline_zip(raw: bytes) -> dict[str, Any]:
 
 class Pipeline(SyncResource):
     """
-    Pipeline service -- the primary interface for Latence AI.
+    Pipeline service -- the primary interface for Latence.
 
     All pipelines are async/job-based by default.  ``run()`` and
     ``submit()`` return a :class:`Job` handle immediately.  Data flows

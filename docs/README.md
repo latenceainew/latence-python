@@ -1,8 +1,8 @@
-# Latence AI SDK Documentation
+# Latence SDK Documentation
 
 ## Pipelines (Primary API)
 
-The pipeline is the recommended way to use Latence AI. It chains multiple services into a single async job and returns a structured `DataPackage`.
+The pipeline is the recommended way to use Latence. It chains multiple services into a single async job and returns a structured `DataPackage`.
 
 | Feature | Guide |
 |---------|-------|

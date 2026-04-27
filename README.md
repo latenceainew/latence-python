@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://www.latence.ai/icon.svg" alt="Latence AI" width="120">
+  <img src="https://www.latence.ai/icon.svg" alt="Latence" width="120">
 </p>
 
-<h1 align="center">Latence AI Python SDK</h1>
+<h1 align="center">Latence Python SDK</h1>
 
 <p align="center">
   <strong>Catch hallucinations, drift, and unused context before your users do.</strong><br>

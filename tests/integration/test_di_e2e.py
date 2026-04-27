@@ -1,5 +1,5 @@
 """
-End-to-end Dataset Intelligence tests for the Latence AI SDK.
+End-to-end Dataset Intelligence tests for the Latence SDK.
 
 Validates the full DI lifecycle:
   - Dataset creation (full tier, async job submission)

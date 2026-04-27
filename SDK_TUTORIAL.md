@@ -1,6 +1,6 @@
-# Latence AI Python SDK -- Complete Tutorial
+# Latence Python SDK -- Complete Tutorial
 
-This tutorial covers every feature of the Latence AI Python SDK: the **Data Intelligence Pipeline** for multi-stage document processing, **direct API access** to individual services, job management, credits, async usage, file handling, error handling, and configuration.
+This tutorial covers every feature of the Latence Python SDK: the **Data Intelligence Pipeline** for multi-stage document processing, **direct API access** to individual services, job management, credits, async usage, file handling, error handling, and configuration.
 
 > **Prerequisites**: Python 3.10+, a Latence API key from [latence.ai](https://latence.ai/keys)
 

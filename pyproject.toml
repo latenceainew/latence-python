@@ -5,12 +5,12 @@ build-backend = "hatchling.build"
 [project]
 name = "latence"
 dynamic = ["version"]
-description = "Official Python SDK for Latence AI API"
+description = "Official Python SDK for Latence API"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
 authors = [
-    { name = "Latence AI", email = "support@latence.ai" }
+    { name = "Latence", email = "support@latence.ai" }
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
