@@ -80,10 +80,11 @@ supplied — the SDK enforces this client-side before the HTTP round-trip.
 | `session_id` | `str \| None` | `None` | Opaque, hashed session identifier (do NOT put user text here). |
 | `request_id` | `str \| None` | `None` | Optional tracking ID. |
 | `verbose` | `bool` | `False` | Return full diagnostics instead of the compact summary. |
+| `profile` | `"standard" \| "quality" \| None` | `None` | Hosted Trace profile. Omitted/`standard` bills $0.008/request; explicit `quality` bills $0.016/request. |
 | `return_job` | `bool` | `False` | Return `JobSubmittedResponse` for async polling. |
 
-**Pricing:** $0.008 per request, quantized per 32,000 context tokens
-(a 64k-token context counts as 2 requests).
+**Pricing:** $0.008 per request for omitted/`standard`; $0.016 per request
+for explicit `profile="quality"`.
 
 **Client-side validation (before HTTP):**
 
@@ -100,9 +101,9 @@ Superset of `rag()`, plus three code-lane-only fields:
 | `emit_chunk_ownership` | `bool` | `False` (server default) | Return per-unit ownership table (adds a few KB over the wire). |
 | `session_state` | `SessionState \| dict \| None` | `None` | Echo the previous turn's `next_session_state` verbatim to chain turns. |
 
-**Pricing:** $2.00 per 1,000,000 aggregate tokens (counted from
-`response_text` + `raw_context` + `query_text` + `support_units` with
-`tiktoken`).
+**Pricing:** same hosted Trace profile pricing as `rag()`:
+$0.008 per request for omitted/`standard`; $0.016 per request for explicit
+`profile="quality"`.
 
 **Client-side validation (before HTTP):** same as `rag()` above &mdash; `response_text` must be non-empty and at least one premise lane (`raw_context`, `chunk_ids`, or `support_units`) must be supplied.
 

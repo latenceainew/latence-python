@@ -97,6 +97,10 @@ print(turn2.band)
 print(turn2.session_signals.recommendation)   # "continue" | "re_anchor" | "fresh_chat"
 ```
 
+Hosted Trace pricing is $0.008/request by default. For higher-cost quality
+mode, pass `profile="quality"` to `trace.rag(...)` or `trace.code(...)`;
+quality requests bill at $0.016/request.
+
 ### Session rollup &mdash; one scoreboard for a live session
 
 Stateless, CPU-only, sub-ms on the pod. Safe to call on every keystroke.

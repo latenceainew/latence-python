@@ -371,8 +371,21 @@ class TestRagRequestBody:
             "query_prompt_name",
             "document_prompt_name",
             "debug_dense_matrices",
+            "profile",
         ):
             assert forbidden not in body, f"{forbidden} should not be in the body"
+
+    def test_rag_profile_passes_through_when_set(self):
+        fake = _FakeSyncClient(data=_rag_response_fixture())
+        Trace(fake).rag(
+            response_text="answer",
+            raw_context="context",
+            profile="quality",
+        )
+
+        body = fake.calls[0][2]
+        assert body is not None
+        assert body["profile"] == "quality"
 
     def test_rag_all_advanced_kwargs_pass_through(self):
         """Every gateway schema field is wired end-to-end.
@@ -489,6 +502,18 @@ class TestCodeRequestBody:
         assert body is not None
         assert body["response_language_hint"] == "py"
         assert body["emit_chunk_ownership"] is True
+
+    def test_code_profile_passes_through_when_set(self):
+        fake = _FakeSyncClient(data=_code_response_fixture())
+        Trace(fake).code(
+            response_text="def f(): pass",
+            raw_context="# utils.py",
+            profile="standard",
+        )
+
+        body = fake.calls[0][2]
+        assert body is not None
+        assert body["profile"] == "standard"
 
 
 class TestCodeSessionRoundTrip:
@@ -674,11 +699,13 @@ class TestAsyncParity:
         r = await AsyncTrace(fake).rag(
             response_text="answer",
             raw_context="context",
+            profile="quality",
         )
         assert fake.calls[0][1] == "/api/v1/trace/rag"
         body = fake.calls[0][2]
         assert body is not None
         assert "scoring_mode" not in body
+        assert body["profile"] == "quality"
         assert r.scoring_mode == "rag"
 
     @pytest.mark.asyncio

@@ -50,6 +50,7 @@ from .._models import (
     SessionState,
     SupportUnitInput,
     TraceCodeResponse,
+    TraceProfile,
     TraceRagResponse,
     TraceResponse,
     TraceRollupResponse,
@@ -216,6 +217,7 @@ class Trace(SyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[False] = False,
     ) -> TraceRagResponse: ...
 
@@ -247,6 +249,7 @@ class Trace(SyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[True],
     ) -> JobSubmittedResponse: ...
 
@@ -277,6 +280,7 @@ class Trace(SyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: bool = False,
     ) -> Union[TraceRagResponse, JobSubmittedResponse]:
         """Score a response for groundedness against retrieval context.
@@ -284,7 +288,8 @@ class Trace(SyncResource):
         At least one of ``raw_context``, ``chunk_ids``, or ``support_units``
         must be supplied (enforced client-side before the HTTP call).
 
-        Pricing: $0.008 per request, quantized per 32k context tokens.
+        Pricing: omitted/``standard`` profile bills $0.008/request;
+        explicit ``quality`` profile bills $0.016/request.
         """
         _require_response_text(response_text)
         _require_premise_lane(
@@ -317,6 +322,7 @@ class Trace(SyncResource):
             debug_dense_matrices=debug_dense_matrices,
             session_id=session_id,
             verbose=verbose,
+            profile=profile,
             request_id=request_id,
             return_job=return_job,
         )
@@ -364,6 +370,7 @@ class Trace(SyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[False] = False,
     ) -> TraceCodeResponse: ...
 
@@ -398,6 +405,7 @@ class Trace(SyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[True],
     ) -> JobSubmittedResponse: ...
 
@@ -431,6 +439,7 @@ class Trace(SyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: bool = False,
     ) -> Union[TraceCodeResponse, JobSubmittedResponse]:
         """Score an agentic-coding turn for phantom hallucinations.
@@ -438,7 +447,8 @@ class Trace(SyncResource):
         Multi-turn usage: pass the previous response's ``next_session_state``
         into the next call via ``session_state=prev.next_session_state``.
 
-        Pricing: $2.00 per 1M aggregate tokens.
+        Pricing: omitted/``standard`` profile bills $0.008/request;
+        explicit ``quality`` profile bills $0.016/request.
         """
         _require_response_text(response_text)
         _require_premise_lane(
@@ -474,6 +484,7 @@ class Trace(SyncResource):
             debug_dense_matrices=debug_dense_matrices,
             session_id=session_id,
             verbose=verbose,
+            profile=profile,
             request_id=request_id,
             return_job=return_job,
         )
@@ -561,6 +572,7 @@ class AsyncTrace(AsyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[False] = False,
     ) -> TraceRagResponse: ...
 
@@ -592,6 +604,7 @@ class AsyncTrace(AsyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[True],
     ) -> JobSubmittedResponse: ...
 
@@ -622,6 +635,7 @@ class AsyncTrace(AsyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: bool = False,
     ) -> Union[TraceRagResponse, JobSubmittedResponse]:
         """Score a response for groundedness (async variant)."""
@@ -656,6 +670,7 @@ class AsyncTrace(AsyncResource):
             debug_dense_matrices=debug_dense_matrices,
             session_id=session_id,
             verbose=verbose,
+            profile=profile,
             request_id=request_id,
             return_job=return_job,
         )
@@ -703,6 +718,7 @@ class AsyncTrace(AsyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[False] = False,
     ) -> TraceCodeResponse: ...
 
@@ -737,6 +753,7 @@ class AsyncTrace(AsyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: Literal[True],
     ) -> JobSubmittedResponse: ...
 
@@ -770,6 +787,7 @@ class AsyncTrace(AsyncResource):
         session_id: str | None = None,
         request_id: str | None = None,
         verbose: bool | None = None,
+        profile: TraceProfile | None = None,
         return_job: bool = False,
     ) -> Union[TraceCodeResponse, JobSubmittedResponse]:
         """Score an agentic-coding turn for phantom hallucinations (async)."""
@@ -807,6 +825,7 @@ class AsyncTrace(AsyncResource):
             debug_dense_matrices=debug_dense_matrices,
             session_id=session_id,
             verbose=verbose,
+            profile=profile,
             request_id=request_id,
             return_job=return_job,
         )

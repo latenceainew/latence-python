@@ -1386,6 +1386,7 @@ r = trace.rag(
     evidence_limit=8,                   # top evidence links in the sparse response
     coverage_threshold=0.5,             # per-unit coverage threshold
     heatmap_format="data",              # "none" | "data" | "html"
+    profile="standard",                 # optional: "standard" | "quality"
 )
 
 print(r.score, r.band)                   # 0.87 "green"
@@ -1394,7 +1395,8 @@ print(r.context_usage_ratio)             # 0.75
 print(r.support_units_usage)             # SupportUnitsUsageSummary(used=3, unused=1, ...)
 ```
 
-**Pricing:** $0.008 per request, quantized per 32,000 context tokens.
+**Pricing:** $0.008 per request for omitted/`standard`; $0.016 per request
+for explicit `profile="quality"`.
 
 ### Structured premises with `SupportUnitInput`
 
@@ -1446,8 +1448,8 @@ print(t2.session_signals.ema_groundedness)
 print(t2.session_signals.recommendation)   # "continue" / "re_anchor" / "fresh_chat"
 ```
 
-**Pricing:** $2.00 per 1,000,000 aggregate tokens (counted with `tiktoken`
-across `response_text` + `raw_context` + `query_text` + `support_units`).
+**Pricing:** same hosted Trace profile pricing as `rag()`: $0.008 per request
+for omitted/`standard`; $0.016 per request for explicit `profile="quality"`.
 
 ### Session rollup — live scoreboards
 

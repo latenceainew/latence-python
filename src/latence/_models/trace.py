@@ -41,6 +41,9 @@ requested mode. See ``latence-trace/runpod/handler.py`` for the mapping.
 HeatmapFormat = Literal["none", "data", "html"]
 """Heatmap emission mode. ``data`` = structured JSON, ``html`` = <div> fragment."""
 
+TraceProfile = Literal["standard", "quality"]
+"""Hosted Trace billing/runtime profile. ``quality`` bills at 2x standard."""
+
 ResponseLanguageHint = Literal[
     "python",
     "py",
