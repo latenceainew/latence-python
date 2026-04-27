@@ -263,6 +263,23 @@ class TestModelParsing:
         r = TraceRagResponse.model_validate(payload)
         assert r.structured_score == 1
 
+    def test_quality_profile_response_metadata_parses(self):
+        payload = _rag_response_fixture() | {
+            "profile": "quality",
+            "effective_profile": "quality",
+            "profile_diagnostics": {
+                "nli_requested": True,
+                "nli_atomic_claims": True,
+                "nli_premise_concat": True,
+                "semantic_entropy_skipped_reason": "semantic_entropy_skipped_no_samples",
+            },
+        }
+        r = TraceRagResponse.model_validate(payload)
+        assert r.profile == "quality"
+        assert r.effective_profile == "quality"
+        assert r.profile_diagnostics is not None
+        assert r.profile_diagnostics["nli_atomic_claims"] is True
+
     def test_real_prod_rag_response_parses(self):
         """Regression: real production gateway returns primary_metric='groundedness_v2'.
 

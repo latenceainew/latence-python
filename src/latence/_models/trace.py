@@ -223,6 +223,15 @@ class TraceResponse(BaseResponse):
     scoring_mode: ScoringMode | None = Field(
         default=None, description="Lane echoed back by the pod."
     )
+    profile: TraceProfile | None = Field(
+        default=None, description="Requested hosted Trace profile echoed by the pod."
+    )
+    effective_profile: TraceProfile | None = Field(
+        default=None, description="Runtime profile that actually configured scoring."
+    )
+    profile_diagnostics: dict[str, Any] | None = Field(
+        default=None, description="Profile feature availability and fusion diagnostics."
+    )
     session_id: str | None = Field(
         default=None, description="Session id echoed back when supplied."
     )
